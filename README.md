@@ -80,7 +80,7 @@ The webhook verifies the Stripe signature, updates the order as paid, and posts 
 The default workflow endpoint is:
 
 ```text
-https://n8n.srv822882.hstgr.cloud/form/a247d6d3-ade7-41c6-9f2b-bbb38350b05c
+https://n8n.srv822882.hstgr.cloud/webhook/de6ee764-0eb3-41b0-9172-16ea4f8e31c7
 ```
 
 The browser never calls n8n directly. The server webhook route sends the payload only after Stripe confirms payment.

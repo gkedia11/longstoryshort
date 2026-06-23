@@ -7,7 +7,7 @@ export const site = {
   currency: "usd",
   delivery: "about 45 minutes",
   n8nUrl:
-    "https://n8n.srv822882.hstgr.cloud/form/a247d6d3-ade7-41c6-9f2b-bbb38350b05c",
+    "https://n8n.srv822882.hstgr.cloud/webhook/de6ee764-0eb3-41b0-9172-16ea4f8e31c7",
 };
 
 export const navItems = [
