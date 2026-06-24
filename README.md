@@ -9,7 +9,7 @@ A Sites-compatible Next/Vinext app for a paid AI fiction manuscript service. The
 - Authenticated dashboard showing submitted orders and status.
 - New story submission flow that saves an order before checkout.
 - Stripe Checkout session route with promotion-code support.
-- Stripe webhook route that updates Supabase and triggers n8n only after confirmed payment.
+- Square payment-link flow alongside Stripe, with webhook handling for both providers.
 - Payment success/cancel pages, contact page, privacy policy, and terms page.
 - Supabase SQL migration for `profiles` and `story_orders` with RLS.
 
@@ -39,9 +39,14 @@ Required environment variables:
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_ID`
+- `SQUARE_APPLICATION_ID`
+- `SQUARE_ACCESS_TOKEN`
+- `SQUARE_LOCATION_ID`
+- `SQUARE_WEBHOOK_SIGNATURE_KEY`
+- `SQUARE_WEBHOOK_NOTIFICATION_URL`
 - `N8N_WEBHOOK_URL`
 
-Never place `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, or `STRIPE_WEBHOOK_SECRET` in frontend code.
+Never place `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, or Square secret values in frontend code.
 
 ## Supabase
 
@@ -74,6 +79,16 @@ checkout.session.completed
 ```
 
 The webhook verifies the Stripe signature, updates the order as paid, and posts the manuscript payload to n8n.
+
+## Square
+
+Create a Square app, add the four Square credentials above, and configure the webhook subscription to point at:
+
+```text
+/api/square/webhook
+```
+
+Listen for payment events such as `payment.created` and `payment.updated`. The app uses the payment link flow for checkout and marks the matching order paid when Square confirms the payment webhook.
 
 ## n8n
 

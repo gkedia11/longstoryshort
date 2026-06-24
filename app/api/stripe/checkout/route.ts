@@ -1,5 +1,6 @@
 import { checkRateLimit, getClientKey } from "@/lib/server/rate-limit";
 import { createCheckoutSession } from "@/lib/server/stripe";
+import { createSquarePaymentLink, isSquareConfigured } from "@/lib/server/square";
 import {
   getStoryOrder,
   getUserFromAuthorization,
@@ -36,6 +37,22 @@ export async function POST(request: Request) {
     const appUrl =
       process.env.NEXT_PUBLIC_APP_URL ??
       new URL(request.url).origin.replace(/\/$/, "");
+    if (isSquareConfigured()) {
+      const checkout = await createSquarePaymentLink({
+        orderId: order.id,
+        customerEmail: order.email,
+        appUrl,
+      });
+
+      await updateStoryOrder(order.id, {
+        stripe_checkout_session_id: checkout.id,
+        stripe_payment_status: checkout.payment_status ?? "pending",
+        story_status: "pending_payment",
+      });
+
+      return Response.json({ checkout_url: checkout.url });
+    }
+
     const checkout = await createCheckoutSession({
       orderId: order.id,
       customerEmail: order.email,
