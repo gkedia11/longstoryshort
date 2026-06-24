@@ -12,7 +12,8 @@ export function AuthPanel() {
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
   const configError = getSupabaseBrowserConfigError();
-  const [email, setEmail] = useState("");
+  const fallbackEmail = process.env.NEXT_PUBLIC_TEST_EMAIL ?? "";
+  const [email, setEmail] = useState(fallbackEmail);
   const [message, setMessage] = useState(
     supabase
       ? "Enter your email to receive a secure sign-in link."

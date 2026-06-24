@@ -18,9 +18,10 @@ type FormState = {
 export function NewStoryForm() {
   const supabase = getSupabaseBrowserClient();
   const configError = getSupabaseBrowserConfigError();
+  const fallbackEmail = process.env.NEXT_PUBLIC_TEST_EMAIL ?? "";
   const [form, setForm] = useState<FormState>({
     name: "",
-    email: "",
+    email: fallbackEmail,
     genre: genres[0],
     summary: "",
   });
