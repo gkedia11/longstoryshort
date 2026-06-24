@@ -20,8 +20,9 @@ export default function LoginPage() {
             Sign in to manage your manuscripts.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-[#52615a]">
-            Your dashboard shows submitted orders, checkout state, payment
-            status, and whether the manuscript workflow has been started.
+            Use your email and password to access submitted orders, checkout
+            state, payment status, and whether the manuscript workflow has
+            been started.
           </p>
         </div>
         <AuthPanel />

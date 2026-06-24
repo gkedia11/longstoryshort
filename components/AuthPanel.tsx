@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import {
   getSupabaseBrowserClient,
   getSupabaseBrowserConfigError,
@@ -14,9 +14,10 @@ export function AuthPanel() {
   const configError = getSupabaseBrowserConfigError();
   const fallbackEmail = process.env.NEXT_PUBLIC_TEST_EMAIL ?? "";
   const [email, setEmail] = useState(fallbackEmail);
+  const [password, setPassword] = useState("");
   const [message, setMessage] = useState(
     supabase
-      ? "Enter your email to receive a secure sign-in link."
+      ? "Enter your email and password to sign in."
       : (configError ?? "Supabase browser keys are not configured yet."),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,29 +35,37 @@ export function AuthPanel() {
     event.preventDefault();
     if (!supabase) return;
     setIsSubmitting(true);
-    setMessage("Sending secure sign-in link...");
+    setMessage("Signing you in...");
 
-    const redirectTo = `${window.location.origin}/dashboard`;
-    const { error } = await supabase.auth.signInWithOtp({
+    const signInResult = await supabase.auth.signInWithPassword({
       email,
-      options: { emailRedirectTo: redirectTo },
+      password,
+    });
+
+    if (!signInResult.error) {
+      setIsSubmitting(false);
+      setMessage("Signed in. Taking you to your dashboard...");
+      router.replace("/dashboard");
+      return;
+    }
+
+    const signUpResult = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+      },
     });
 
     setIsSubmitting(false);
-    setMessage(
-      error
-        ? error.message
-        : "Check your email for the sign-in link, then return to your dashboard.",
-    );
-  }
+    if (signUpResult.error) {
+      setMessage(signUpResult.error.message);
+      return;
+    }
 
-  async function handleGoogle() {
-    if (!supabase) return;
-    setMessage("Opening Google sign-in...");
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
-    });
+    setMessage(
+      "Account created. Sign in again with the same email and password if needed.",
+    );
   }
 
   return (
@@ -80,25 +89,34 @@ export function AuthPanel() {
             required
           />
         </div>
+        <div>
+          <label
+            htmlFor="password"
+            className="text-sm font-semibold text-[#101513]"
+          >
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            className="field mt-2"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            disabled={!supabase || isSubmitting}
+            required
+            minLength={8}
+          />
+        </div>
         <button
           type="submit"
           disabled={!supabase || isSubmitting}
           className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#007a4d] px-5 py-3 font-semibold text-white transition hover:bg-[#004d33] disabled:cursor-not-allowed disabled:opacity-55"
         >
           <Mail aria-hidden="true" size={18} />
-          Send sign-in link
+          Sign in
         </button>
       </form>
-      <div className="my-6 h-px bg-[#dbe5df]" />
-      <button
-        type="button"
-        onClick={handleGoogle}
-        disabled={!supabase}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#dbe5df] bg-white px-5 py-3 font-semibold text-[#101513] transition hover:border-[#007a4d] disabled:cursor-not-allowed disabled:opacity-55"
-      >
-        Continue with Google
-        <ArrowRight aria-hidden="true" size={18} />
-      </button>
       <p className="mt-5 text-sm leading-6 text-[#52615a]">{message}</p>
     </div>
   );
