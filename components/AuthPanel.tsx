@@ -3,16 +3,20 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Mail } from "lucide-react";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import {
+  getSupabaseBrowserClient,
+  getSupabaseBrowserConfigError,
+} from "@/lib/supabase/client";
 
 export function AuthPanel() {
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
+  const configError = getSupabaseBrowserConfigError();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState(
     supabase
       ? "Enter your email to receive a secure sign-in link."
-      : "Supabase browser keys are not configured yet.",
+      : (configError ?? "Supabase browser keys are not configured yet."),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 

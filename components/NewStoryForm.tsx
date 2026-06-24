@@ -3,7 +3,10 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ArrowRight, CreditCard, LockKeyhole } from "lucide-react";
 import { genres, site } from "@/lib/site";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import {
+  getSupabaseBrowserClient,
+  getSupabaseBrowserConfigError,
+} from "@/lib/supabase/client";
 
 type FormState = {
   name: string;
@@ -14,6 +17,7 @@ type FormState = {
 
 export function NewStoryForm() {
   const supabase = getSupabaseBrowserClient();
+  const configError = getSupabaseBrowserConfigError();
   const [form, setForm] = useState<FormState>({
     name: "",
     email: "",
@@ -23,19 +27,29 @@ export function NewStoryForm() {
   const [message, setMessage] = useState(
     supabase
       ? "Tell us the manuscript you want. Your summary is saved before checkout."
-      : "Supabase browser keys are not configured yet.",
+      : (configError ?? "Supabase browser keys are not configured yet."),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validationMessage = useMemo(() => {
+    if (configError) return configError;
+    if (form.name.trim().length < 2) return "Enter your name.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      return "Enter a valid email address.";
+    }
+    if (form.summary.trim().length < 40) {
+      return "Add at least 40 characters to the story summary.";
+    }
+    return null;
+  }, [configError, form]);
 
   const canSubmit = useMemo(() => {
     return (
       Boolean(supabase) &&
-      form.name.trim().length >= 2 &&
-      form.email.includes("@") &&
-      form.summary.trim().length >= 40 &&
+      !validationMessage &&
       !isSubmitting
     );
-  }, [form, isSubmitting, supabase]);
+  }, [isSubmitting, supabase, validationMessage]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -222,7 +236,9 @@ export function NewStoryForm() {
           <ArrowRight aria-hidden="true" size={18} />
         </button>
       </div>
-      <p className="mt-5 text-sm leading-6 text-[#52615a]">{message}</p>
+      <p className="mt-5 text-sm leading-6 text-[#52615a]">
+        {validationMessage ?? message}
+      </p>
     </form>
   );
 }

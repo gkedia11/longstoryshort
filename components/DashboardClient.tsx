@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, RefreshCw } from "lucide-react";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import {
+  getSupabaseBrowserClient,
+  getSupabaseBrowserConfigError,
+} from "@/lib/supabase/client";
 
 type StoryOrder = {
   id: string;
@@ -27,11 +30,12 @@ const badgeClass: Record<string, string> = {
 
 export function DashboardClient() {
   const supabase = getSupabaseBrowserClient();
+  const configError = getSupabaseBrowserConfigError();
   const [orders, setOrders] = useState<StoryOrder[]>([]);
   const [message, setMessage] = useState(
     supabase
       ? "Loading your manuscript orders..."
-      : "Supabase browser keys are not configured yet.",
+      : (configError ?? "Supabase browser keys are not configured yet."),
   );
   const [isLoading, setIsLoading] = useState(Boolean(supabase));
 
