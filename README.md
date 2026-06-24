@@ -48,7 +48,7 @@ Never place `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, or `STRIPE_WEBHOOK
 Run the SQL in `supabase/migrations/0001_initial.sql` against the Supabase project:
 
 ```text
-https://ruppdwkinpbzwibygkdg.supabase.co
+https://pkfrlaifkepfprxuqrpq.supabase.co
 ```
 
 The migration enables RLS so users can read and create only their own story orders. Server routes use the service-role key for payment and workflow status updates.
