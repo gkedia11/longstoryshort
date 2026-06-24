@@ -24,7 +24,7 @@ const steps = [
   },
   {
     title: "Checkout once",
-    text: "Pay $29.99 through Stripe Checkout. Promotion codes are supported.",
+    text: "Pay $29.99 through Square checkout. Promotion codes are supported.",
     icon: CreditCard,
   },
   {
@@ -44,7 +44,7 @@ const examples = [
 const assurances = [
   "No subscription",
   "One complete fiction manuscript",
-  "Stripe-secured checkout",
+  "Square-secured checkout",
   "Dashboard order tracking",
   "Server-side workflow trigger",
   "Email delivery",
@@ -59,7 +59,7 @@ const faqs = [
   {
     question: "When does generation start?",
     answer:
-      "Only after Stripe confirms payment through the webhook. Your story summary is saved first so the order can be recovered.",
+      "Only after Square confirms payment through the webhook. Your story summary is saved first so the order can be recovered.",
   },
   {
     question: "How long does delivery take?",
@@ -145,7 +145,7 @@ export default function Home() {
               },
               {
                 title: "Payment-gated workflow",
-                text: "The manuscript workflow only fires after Stripe confirms a completed checkout.",
+                text: "The manuscript workflow only fires after Square confirms a completed checkout.",
                 icon: ShieldCheck,
               },
               {
@@ -282,7 +282,7 @@ export default function Home() {
                 </Link>
               </div>
               <div className="mt-8 grid gap-3 border-t border-[#dbe5df] pt-6 text-sm text-[#52615a] sm:grid-cols-2">
-                <p>Stripe Checkout with promotion-code support.</p>
+                <p>Square checkout with promotion-code support.</p>
                 <p>Order status remains visible in your dashboard.</p>
                 <p>Workflow trigger stays server-side after payment.</p>
                 <p>Support at {site.supportEmail}.</p>

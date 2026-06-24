@@ -24,7 +24,7 @@ export default function PrivacyPage() {
               </h2>
               <p className="mt-3">
                 We collect account email, name, selected genre, story summary,
-                Stripe checkout identifiers, payment status, and workflow
+                checkout identifiers, payment status, and workflow
                 status needed to fulfill manuscript orders.
               </p>
             </section>
@@ -43,7 +43,7 @@ export default function PrivacyPage() {
                 Payment and workflow providers
               </h2>
               <p className="mt-3">
-                Payments are processed by Stripe. After successful payment, the
+                Payments are processed by Square. After successful payment, the
                 manuscript payload is sent server-side to the configured
                 workflow endpoint.
               </p>

@@ -104,7 +104,7 @@ export function NewStoryForm() {
     }
 
     setMessage("Opening secure checkout...");
-    const response = await fetch("/api/stripe/checkout", {
+    const response = await fetch("/api/checkout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
