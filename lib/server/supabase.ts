@@ -90,6 +90,41 @@ async function supabaseRest<T>(
   return (await response.json()) as T;
 }
 
+async function supabaseUserRest<T>(
+  path: string,
+  authorization: string,
+  init: RequestInit = {},
+) {
+  const { url, anonKey } = getPublicSupabaseConfig();
+  const headers = new Headers(init.headers);
+  headers.set("apikey", anonKey);
+  headers.set("Authorization", authorization);
+  headers.set("Content-Type", "application/json");
+
+  const response = await fetch(`${url}/rest/v1/${path}`, {
+    ...init,
+    headers,
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Supabase request failed: ${detail}`);
+  }
+
+  return (await response.json()) as T;
+}
+
+export async function getStoryOrderForUser(
+  orderId: string,
+  authorization: string,
+) {
+  const rows = await supabaseUserRest<StoryOrder[]>(
+    `story_orders?id=eq.${encodeURIComponent(orderId)}&select=*`,
+    authorization,
+  );
+  return rows[0] ?? null;
+}
+
 export async function getStoryOrder(orderId: string) {
   const rows = await supabaseRest<StoryOrder[]>(
     `story_orders?id=eq.${encodeURIComponent(orderId)}&select=*`,

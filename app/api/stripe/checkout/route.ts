@@ -2,7 +2,7 @@ import { checkRateLimit, getClientKey } from "@/lib/server/rate-limit";
 import { createCheckoutSession } from "@/lib/server/stripe";
 import { createSquarePaymentLink, isSquareConfigured } from "@/lib/server/square";
 import {
-  getStoryOrder,
+  getStoryOrderForUser,
   getUserFromAuthorization,
   updateStoryOrder,
 } from "@/lib/server/supabase";
@@ -14,15 +14,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    const user = await getUserFromAuthorization(
-      request.headers.get("authorization"),
-    );
+    const authorization = request.headers.get("authorization");
+    const user = await getUserFromAuthorization(authorization);
     const body = (await request.json()) as { order_id?: string };
     if (!body.order_id) {
       return Response.json({ error: "order_id is required." }, { status: 400 });
     }
 
-    const order = await getStoryOrder(body.order_id);
+    const order = await getStoryOrderForUser(body.order_id, authorization ?? "");
     if (!order || order.user_id !== user.id) {
       return Response.json({ error: "Order not found." }, { status: 404 });
     }
@@ -42,12 +41,6 @@ export async function POST(request: Request) {
         orderId: order.id,
         customerEmail: order.email,
         appUrl,
-      });
-
-      await updateStoryOrder(order.id, {
-        stripe_checkout_session_id: checkout.id,
-        stripe_payment_status: checkout.payment_status ?? "pending",
-        story_status: "pending_payment",
       });
 
       return Response.json({ checkout_url: checkout.url });
