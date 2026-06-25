@@ -43,6 +43,12 @@ export async function POST(request: Request) {
         appUrl,
       });
 
+      await updateStoryOrder(order.id, {
+        stripe_checkout_session_id: checkout.id,
+        stripe_payment_status: checkout.payment_status,
+        story_status: "pending_payment",
+      });
+
       return Response.json({ checkout_url: checkout.url });
     }
 

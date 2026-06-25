@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, CreditCard, RefreshCw } from "lucide-react";
 import {
   getSupabaseBrowserClient,
   getSupabaseBrowserConfigError,
@@ -29,6 +30,7 @@ const badgeClass: Record<string, string> = {
 };
 
 export function DashboardClient() {
+  const router = useRouter();
   const supabase = getSupabaseBrowserClient();
   const configError = getSupabaseBrowserConfigError();
   const [orders, setOrders] = useState<StoryOrder[]>([]);
@@ -38,6 +40,7 @@ export function DashboardClient() {
       : (configError ?? "Supabase browser keys are not configured yet."),
   );
   const [isLoading, setIsLoading] = useState(Boolean(supabase));
+  const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
 
   const hasOrders = useMemo(() => orders.length > 0, [orders]);
 
@@ -113,6 +116,40 @@ export function DashboardClient() {
     };
   }, [supabase]);
 
+  async function handlePayNow(orderId: string) {
+    if (!supabase) return;
+
+    setPayingOrderId(orderId);
+    setMessage("Opening secure checkout...");
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const response = await fetch("/api/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ order_id: orderId }),
+    });
+    const payload = (await response.json()) as {
+      checkout_url?: string;
+      error?: string;
+    };
+
+    if (!response.ok || !payload.checkout_url) {
+      setPayingOrderId(null);
+      setMessage(payload.error ?? "Could not open checkout.");
+      return;
+    }
+
+    router.push(payload.checkout_url);
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-5 border-b border-[#dbe5df] pb-8 md:flex-row md:items-end md:justify-between">
@@ -153,39 +190,63 @@ export function DashboardClient() {
                   <th className="px-5 py-4 font-semibold">Payment</th>
                   <th className="px-5 py-4 font-semibold">Story status</th>
                   <th className="px-5 py-4 font-semibold">Created</th>
+                  <th className="px-5 py-4 font-semibold">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#dbe5df]">
-                {orders.map((order) => (
-                  <tr key={order.id} className="align-top">
-                    <td className="max-w-md px-5 py-4">
-                      <p className="font-semibold text-[#101513]">
-                        {order.name}
-                      </p>
-                      <p className="mt-1 line-clamp-2 text-[#52615a]">
-                        {order.summary}
-                      </p>
-                    </td>
-                    <td className="px-5 py-4 text-[#34423c]">{order.genre}</td>
-                    <td className="px-5 py-4 text-[#34423c]">
-                      {order.stripe_payment_status ?? "unpaid"}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span
-                        className={[
-                          "inline-flex rounded-full px-3 py-1 text-xs font-semibold",
-                          badgeClass[order.story_status] ??
-                            "bg-slate-100 text-slate-700",
-                        ].join(" ")}
-                      >
-                        {order.story_status.replaceAll("_", " ")}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-[#52615a]">
-                      {new Date(order.created_at).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
+                {orders.map((order) => {
+                  const canPay =
+                    order.story_status === "pending_payment" ||
+                    order.stripe_payment_status === "unpaid";
+
+                  return (
+                    <tr key={order.id} className="align-top">
+                      <td className="max-w-md px-5 py-4">
+                        <p className="font-semibold text-[#101513]">
+                          {order.name}
+                        </p>
+                        <p className="mt-1 line-clamp-2 text-[#52615a]">
+                          {order.summary}
+                        </p>
+                      </td>
+                      <td className="px-5 py-4 text-[#34423c]">
+                        {order.genre}
+                      </td>
+                      <td className="px-5 py-4 text-[#34423c]">
+                        {order.stripe_payment_status ?? "unpaid"}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={[
+                            "inline-flex rounded-full px-3 py-1 text-xs font-semibold",
+                            badgeClass[order.story_status] ??
+                              "bg-slate-100 text-slate-700",
+                          ].join(" ")}
+                        >
+                          {order.story_status.replaceAll("_", " ")}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-[#52615a]">
+                        {new Date(order.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-5 py-4">
+                        {canPay ? (
+                          <button
+                            type="button"
+                            onClick={() => handlePayNow(order.id)}
+                            disabled={payingOrderId === order.id}
+                            className="inline-flex items-center gap-2 rounded-full bg-[#007a4d] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#004d33] disabled:cursor-not-allowed disabled:opacity-55"
+                          >
+                            <CreditCard aria-hidden="true" size={16} />
+                            {payingOrderId === order.id ? "Opening..." : "Pay now"}
+                          </button>
+                        ) : (
+                          <span className="text-sm text-[#6f7d76]">Done</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

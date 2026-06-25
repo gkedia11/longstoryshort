@@ -132,6 +132,13 @@ export async function getStoryOrder(orderId: string) {
   return rows[0] ?? null;
 }
 
+export async function getStoryOrderByCheckoutId(checkoutId: string) {
+  const rows = await supabaseRest<StoryOrder[]>(
+    `story_orders?stripe_checkout_session_id=eq.${encodeURIComponent(checkoutId)}&select=*`,
+  );
+  return rows[0] ?? null;
+}
+
 export async function updateStoryOrder(
   orderId: string,
   payload: Partial<StoryOrder>,

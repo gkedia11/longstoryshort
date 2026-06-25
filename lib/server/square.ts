@@ -3,9 +3,27 @@ import { site } from "@/lib/site";
 type SquarePaymentLinkResponse = {
   payment_link?: {
     id: string;
+    order_id?: string;
     url?: string;
     long_url?: string;
   };
+  errors?: Array<{ detail?: string; code?: string }>;
+};
+
+export type SquareOrder = {
+  id: string;
+  state?: string;
+  total_money?: { amount?: number; currency?: string };
+  net_amount_due_money?: { amount?: number; currency?: string };
+  tenders?: Array<{
+    id?: string;
+    payment_id?: string;
+    amount_money?: { amount?: number; currency?: string };
+  }>;
+};
+
+type SquareOrderResponse = {
+  order?: SquareOrder;
   errors?: Array<{ detail?: string; code?: string }>;
 };
 
@@ -59,7 +77,8 @@ export async function createSquarePaymentLink(input: {
     pre_populated_data: {
       buyer_email: input.customerEmail,
     },
-    note: `order_id=${input.orderId}; application_id=${applicationId}`,
+    description: `Longstory Short Story manuscript order ${input.orderId}`,
+    payment_note: `story_order_id=${input.orderId}; application_id=${applicationId}`,
   };
 
   const response = await fetch(
@@ -83,10 +102,40 @@ export async function createSquarePaymentLink(input: {
   }
 
   return {
-    id: payload.payment_link.id,
+    id: payload.payment_link.order_id ?? payload.payment_link.id,
+    paymentLinkId: payload.payment_link.id,
     url: payload.payment_link.url,
     payment_status: "pending",
   };
+}
+
+export async function retrieveSquareOrder(squareOrderId: string) {
+  const accessToken = required("SQUARE_ACCESS_TOKEN");
+  const response = await fetch(
+    `https://connect.squareup.com/v2/orders/${encodeURIComponent(squareOrderId)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Square-Version": "2025-06-18",
+      },
+    },
+  );
+  const payload = (await response.json()) as SquareOrderResponse;
+
+  if (!response.ok || !payload.order) {
+    const detail = payload.errors?.[0]?.detail ?? "Square order lookup failed";
+    throw new Error(detail);
+  }
+
+  return payload.order;
+}
+
+export function isSquareOrderPaid(order: SquareOrder) {
+  const netDue = order.net_amount_due_money?.amount;
+  const hasTender = Boolean(order.tenders?.some((tender) => tender.payment_id));
+  const isClosedEnough = order.state === "OPEN" || order.state === "COMPLETED";
+
+  return hasTender || (isClosedEnough && netDue === 0);
 }
 
 function parseSquareSignature(
@@ -144,6 +193,16 @@ export async function verifySquareWebhook(
   return JSON.parse(rawBody) as {
     type: string;
     event_id: string;
-    data: { id?: string; object?: { payment?: { id?: string; status?: string } } };
+    data: {
+      id?: string;
+      object?: {
+        payment?: {
+          id?: string;
+          order_id?: string;
+          status?: string;
+          note?: string;
+        };
+      };
+    };
   };
 }
