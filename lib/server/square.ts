@@ -61,7 +61,7 @@ export async function createSquarePaymentLink(input: {
   const locationId = required("SQUARE_LOCATION_ID");
   const applicationId = required("SQUARE_APPLICATION_ID");
   const body = {
-    idempotency_key: input.orderId,
+    idempotency_key: `${input.orderId}-${crypto.randomUUID()}`,
     quick_pay: {
       name: `${site.name} order`,
       price_money: {
