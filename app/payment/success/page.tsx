@@ -23,8 +23,15 @@ export default async function PaymentSuccessPage({
           Payment received.
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-[#52615a]">
-          Your manuscript workflow will start after Stripe confirms the webhook.
-          The finished manuscript will be emailed in {site.delivery}.
+          Thank you for your purchase. Your complete manuscript will be emailed
+          in {site.delivery}. If you have any questions, please write to{" "}
+          <a
+            href={`mailto:${site.supportEmail}`}
+            className="font-semibold text-[#007a4d]"
+          >
+            {site.supportEmail}
+          </a>
+          .
         </p>
         {params.order_id ? (
           <p className="mt-5 font-mono text-sm text-[#6f7d76]">
