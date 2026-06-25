@@ -14,7 +14,7 @@ export function Logo({ compact = false }: LogoProps) {
     >
       <span
         className={[
-          "relative block overflow-hidden bg-black",
+          "relative block overflow-hidden",
           compact ? "h-10 w-44" : "h-12 w-52 sm:w-64",
         ].join(" ")}
       >
