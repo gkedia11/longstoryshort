@@ -1,3 +1,5 @@
+import { createClient } from "@supabase/supabase-js";
+
 type SupabaseUser = {
   id: string;
   email?: string;
@@ -40,116 +42,101 @@ export function getServerSupabaseConfig() {
   };
 }
 
+function getServiceClient() {
+  const { url, serviceRoleKey } = getServerSupabaseConfig();
+  return createClient(url, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
+
 export async function getUserFromAuthorization(authorization: string | null) {
   if (!authorization?.startsWith("Bearer ")) {
     throw new Error("Missing Supabase access token");
   }
 
   const { url, anonKey } = getPublicSupabaseConfig();
-  const response = await fetch(`${url}/auth/v1/user`, {
-    headers: {
-      apikey: anonKey,
-      Authorization: authorization,
+  const client = createClient(url, anonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
     },
   });
+  const token = authorization.replace(/^Bearer\s+/i, "");
+  const { data, error } = await client.auth.getUser(token);
 
-  if (!response.ok) {
+  if (error || !data.user) {
     throw new Error("Supabase session could not be verified");
   }
 
-  return (await response.json()) as SupabaseUser;
-}
-
-async function supabaseRest<T>(
-  path: string,
-  init: RequestInit & { prefer?: string } = {},
-) {
-  const { url, serviceRoleKey } = getServerSupabaseConfig();
-  const headers = new Headers(init.headers);
-  headers.set("apikey", serviceRoleKey);
-  headers.set("Authorization", `Bearer ${serviceRoleKey}`);
-  headers.set("Content-Type", "application/json");
-  if (init.prefer) {
-    headers.set("Prefer", init.prefer);
-  }
-
-  const response = await fetch(`${url}/rest/v1/${path}`, {
-    ...init,
-    headers,
-  });
-
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(`Supabase request failed: ${detail}`);
-  }
-
-  if (response.status === 204) {
-    return null as T;
-  }
-
-  return (await response.json()) as T;
-}
-
-async function supabaseUserRest<T>(
-  path: string,
-  authorization: string,
-  init: RequestInit = {},
-) {
-  const { url, anonKey } = getPublicSupabaseConfig();
-  const headers = new Headers(init.headers);
-  headers.set("apikey", anonKey);
-  headers.set("Authorization", authorization);
-  headers.set("Content-Type", "application/json");
-
-  const response = await fetch(`${url}/rest/v1/${path}`, {
-    ...init,
-    headers,
-  });
-
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(`Supabase request failed: ${detail}`);
-  }
-
-  return (await response.json()) as T;
+  return {
+    id: data.user.id,
+    email: data.user.email,
+  } satisfies SupabaseUser;
 }
 
 export async function getStoryOrderForUser(
   orderId: string,
-  authorization: string,
+  userId: string,
 ) {
-  const rows = await supabaseUserRest<StoryOrder[]>(
-    `story_orders?id=eq.${encodeURIComponent(orderId)}&select=*`,
-    authorization,
-  );
-  return rows[0] ?? null;
+  const { data, error } = await getServiceClient()
+    .from("story_orders")
+    .select("*")
+    .eq("id", orderId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Supabase order lookup failed: ${error.message}`);
+  }
+
+  return data as StoryOrder | null;
 }
 
 export async function getStoryOrder(orderId: string) {
-  const rows = await supabaseRest<StoryOrder[]>(
-    `story_orders?id=eq.${encodeURIComponent(orderId)}&select=*`,
-  );
-  return rows[0] ?? null;
+  const { data, error } = await getServiceClient()
+    .from("story_orders")
+    .select("*")
+    .eq("id", orderId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Supabase order lookup failed: ${error.message}`);
+  }
+
+  return data as StoryOrder | null;
 }
 
 export async function getStoryOrderByCheckoutId(checkoutId: string) {
-  const rows = await supabaseRest<StoryOrder[]>(
-    `story_orders?stripe_checkout_session_id=eq.${encodeURIComponent(checkoutId)}&select=*`,
-  );
-  return rows[0] ?? null;
+  const { data, error } = await getServiceClient()
+    .from("story_orders")
+    .select("*")
+    .eq("stripe_checkout_session_id", checkoutId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Supabase checkout lookup failed: ${error.message}`);
+  }
+
+  return data as StoryOrder | null;
 }
 
 export async function updateStoryOrder(
   orderId: string,
   payload: Partial<StoryOrder>,
 ) {
-  const rows = await supabaseRest<StoryOrder[]>(
-    `story_orders?id=eq.${encodeURIComponent(orderId)}&select=*`,
-    {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-      prefer: "return=representation",
-    },
-  );
-  return rows[0] ?? null;
+  const { data, error } = await getServiceClient()
+    .from("story_orders")
+    .update(payload)
+    .eq("id", orderId)
+    .select("*")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Supabase order update failed: ${error.message}`);
+  }
+
+  return data as StoryOrder | null;
 }

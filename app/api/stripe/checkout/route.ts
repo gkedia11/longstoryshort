@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "order_id is required." }, { status: 400 });
     }
 
-    const order = await getStoryOrderForUser(body.order_id, authorization ?? "");
+    const order = await getStoryOrderForUser(body.order_id, user.id);
     if (!order || order.user_id !== user.id) {
       return Response.json({ error: "Order not found." }, { status: 404 });
     }
