@@ -1,11 +1,11 @@
 # Longstory Short Story
 
-A Sites-compatible Next/Vinext app for a paid AI fiction manuscript service. The website uses the supplied project logo as the visible brand mark and keeps payment/workflow secrets on server routes.
+A Cloudflare Workers Next/Vinext app for a paid AI fiction manuscript service. The website uses the supplied project logo as the visible brand mark and keeps payment/workflow secrets on server routes.
 
 ## What Is Included
 
 - Premium marketing homepage with the provided logo in the header and footer.
-- Supabase email-link and Google sign-in page.
+- Supabase email/password sign-in with password reset.
 - Authenticated dashboard showing submitted orders and status.
 - New story submission flow that saves an order before checkout.
 - Stripe Checkout session route with promotion-code support.
@@ -58,10 +58,10 @@ https://pkfrlaifkepfprxuqrpq.supabase.co
 
 The migration enables RLS so users can read and create only their own story orders. Server routes use the service-role key for payment and workflow status updates.
 
-For Google auth, make sure Supabase Auth is configured with the provided Google client and that production redirects include:
+For password reset, make sure Supabase Auth redirects include:
 
 ```text
-https://longstoryshortstory.com/dashboard
+https://longstory-short-story.gkedia.workers.dev/login
 ```
 
 ## Stripe
@@ -98,7 +98,7 @@ The default workflow endpoint is:
 https://n8n.srv822882.hstgr.cloud/webhook/de6ee764-0eb3-41b0-9172-16ea4f8e31c7
 ```
 
-The browser never calls n8n directly. The server webhook route sends the payload only after Stripe confirms payment.
+The browser never calls n8n directly. The server webhook route sends the payload only after Square confirms payment.
 
 ## Development
 
@@ -117,12 +117,18 @@ npm run build
 npm audit
 ```
 
-## Sites Deployment
+## Cloudflare Deployment
 
-This repository is scaffolded from the Sites Vinext starter and includes `.openai/hosting.json`. Build with:
+Build with:
 
 ```bash
 npm run build
 ```
 
-Sites runtime environment variables are managed through the Sites connector, not `.openai/hosting.json`.
+Deploy the generated Worker with Wrangler:
+
+```bash
+npx wrangler deploy --config dist/server/wrangler.json
+```
+
+Set production runtime variables and secrets in Cloudflare Workers. Do not commit secret values.
