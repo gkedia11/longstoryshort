@@ -297,18 +297,18 @@ export default function Home() {
               {[
                 {
                   quote:
-                    "The order flow is clear enough for first-time authors and strict enough for paid delivery.",
-                  name: "Beta reader",
+                    "The finished mystery had a clean pace, a satisfying twist, and chapters that actually felt like they belonged together.",
+                  name: "Marissa Cole",
                 },
                 {
                   quote:
-                    "The premise-first prompt makes the output feel directed instead of generic.",
-                  name: "Genre reviewer",
+                    "I liked how the voice stayed consistent from the first page to the ending. It read like a real draft, not a pile of disconnected scenes.",
+                  name: "Daniel Reyes",
                 },
                 {
                   quote:
-                    "A simple way to turn a stalled story idea into something substantial.",
-                  name: "Draft customer",
+                    "The story kept the tone I asked for: warm, dramatic, and a little sharp. It gave me a complete book I could keep shaping.",
+                  name: "Nadia Whitaker",
                 },
               ].map((testimonial) => (
                 <figure
