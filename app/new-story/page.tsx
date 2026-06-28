@@ -11,9 +11,8 @@ export default function NewStoryPage() {
             Start a manuscript order.
           </h1>
           <p className="mt-3 text-lg leading-8 text-[#52615a]">
-            Give the workflow enough direction to write with intent. Specific
-            characters, setting, stakes, and tone usually produce stronger
-            drafts.
+            Give us enough direction to write with intent. Specific characters,
+            setting, stakes, and tone usually produce stronger drafts.
           </p>
         </div>
         <NewStoryForm />

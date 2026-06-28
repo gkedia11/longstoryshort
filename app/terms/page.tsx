@@ -33,7 +33,7 @@ export default function TermsPage() {
               </h2>
               <p className="mt-3">
                 Each manuscript order costs {site.price}. Payment is processed
-                through Square checkout before the manuscript workflow begins.
+                through secure checkout before work begins on the manuscript.
               </p>
             </section>
             <section>

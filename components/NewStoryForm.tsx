@@ -223,8 +223,8 @@ export function NewStoryForm() {
             className="mt-1 shrink-0 text-[#007a4d]"
           />
           <span>
-            Your order is saved before checkout. The manuscript workflow starts
-            only after payment confirmation.
+            Your order is saved before checkout. Work on the manuscript begins
+            after payment confirmation.
           </span>
         </div>
         <button

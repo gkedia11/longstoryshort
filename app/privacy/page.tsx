@@ -24,8 +24,8 @@ export default function PrivacyPage() {
               </h2>
               <p className="mt-3">
                 We collect account email, name, selected genre, story summary,
-                checkout identifiers, payment status, and workflow
-                status needed to fulfill manuscript orders.
+                checkout identifiers, payment status, and order status needed
+                to fulfill manuscript orders.
               </p>
             </section>
             <section>
@@ -34,18 +34,18 @@ export default function PrivacyPage() {
               </h2>
               <p className="mt-3">
                 Order details are used to save your request, process payment,
-                trigger the manuscript workflow after payment confirmation, and
-                email the completed manuscript.
+                prepare the manuscript after payment confirmation, and email
+                the completed manuscript.
               </p>
             </section>
             <section>
               <h2 className="text-2xl font-semibold text-[#101513]">
-                Payment and workflow providers
+                Payment and fulfillment providers
               </h2>
               <p className="mt-3">
-                Payments are processed by Square. After successful payment, the
-                manuscript payload is sent server-side to the configured
-                workflow endpoint.
+                Payments are processed by a secure checkout provider. After
+                successful payment, order details are shared with the providers
+                needed to prepare and deliver the manuscript.
               </p>
             </section>
             <section>

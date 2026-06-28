@@ -24,12 +24,12 @@ const steps = [
   },
   {
     title: "Checkout once",
-    text: "Pay $29.99 through Square checkout. Promotion codes are supported.",
+    text: "Pay $29.99 through secure checkout. Promotion codes are supported.",
     icon: CreditCard,
   },
   {
     title: "Receive the manuscript",
-    text: "After payment clears, the manuscript workflow starts and delivery goes to your inbox.",
+    text: "After checkout is complete, we prepare your manuscript and send it to your inbox.",
     icon: Mail,
   },
 ];
@@ -44,9 +44,9 @@ const examples = [
 const assurances = [
   "No subscription",
   "One complete fiction manuscript",
-  "Square-secured checkout",
+  "Secure checkout",
   "Dashboard order tracking",
-  "Server-side workflow trigger",
+  "Email delivery updates",
   "Email delivery",
 ];
 
@@ -57,14 +57,14 @@ const faqs = [
       "A complete fiction manuscript based on the genre and story summary you submit. The finished draft is delivered by email.",
   },
   {
-    question: "When does generation start?",
+    question: "When do you start work on my book?",
     answer:
-      "Only after Square confirms payment through the webhook. Your story summary is saved first so the order can be recovered.",
+      "We begin after your order is complete. Your manuscript is then prepared and emailed in about 45 minutes.",
   },
   {
     question: "How long does delivery take?",
     answer:
-      "The service message is about 45 minutes. Actual timing can vary if the workflow provider is under heavy load.",
+      "The expected delivery time is about 45 minutes. Actual timing can vary during unusually busy periods.",
   },
   {
     question: "Is this a subscription?",
@@ -140,17 +140,17 @@ export default function Home() {
             {[
               {
                 title: "Built for serious drafts",
-                text: "Prompts ask for premise, genre, and direction before the workflow starts.",
+                text: "Prompts ask for premise, genre, and direction before work begins.",
                 icon: BookOpen,
               },
               {
-                title: "Payment-gated workflow",
-                text: "The manuscript workflow only fires after Square confirms a completed checkout.",
+                title: "Work begins after checkout",
+                text: "Your manuscript is prepared after your order is complete.",
                 icon: ShieldCheck,
               },
               {
                 title: "Recoverable orders",
-                text: "Story summaries are saved before payment so dashboard status stays visible.",
+                text: "Your story summary stays visible in your dashboard so you can track your order.",
                 icon: Clock,
               },
             ].map((item) => (
@@ -181,8 +181,8 @@ export default function Home() {
               </h2>
               <p className="mt-5 text-lg leading-8 text-[#52615a]">
                 The flow is intentionally simple: capture the story, collect
-                payment, trigger the manuscript workflow, and keep order status
-                visible in the dashboard.
+                payment, prepare the manuscript, and keep order status visible
+                in the dashboard.
               </p>
             </div>
             <div className="mt-12 grid gap-5 lg:grid-cols-3">
@@ -282,9 +282,9 @@ export default function Home() {
                 </Link>
               </div>
               <div className="mt-8 grid gap-3 border-t border-[#dbe5df] pt-6 text-sm text-[#52615a] sm:grid-cols-2">
-                <p>Square checkout with promotion-code support.</p>
+                <p>Secure checkout with promotion-code support.</p>
                 <p>Order status remains visible in your dashboard.</p>
-                <p>Workflow trigger stays server-side after payment.</p>
+                <p>Your manuscript is prepared after checkout is complete.</p>
                 <p>Support at {site.supportEmail}.</p>
               </div>
             </div>
@@ -384,15 +384,15 @@ export default function Home() {
           <div className="mx-auto grid max-w-7xl gap-4 text-sm text-white/70 sm:grid-cols-3">
             <div className="flex items-center gap-3">
               <LockKeyhole aria-hidden="true" size={18} />
-              Secret keys stay server-side.
+              Secure checkout.
             </div>
             <div className="flex items-center gap-3">
               <FileText aria-hidden="true" size={18} />
-              Story orders are stored before payment.
+              Story details stay attached to your order.
             </div>
             <div className="flex items-center gap-3">
               <ShieldCheck aria-hidden="true" size={18} />
-              RLS keeps users scoped to their own orders.
+              Your dashboard shows your own orders.
             </div>
           </div>
         </section>

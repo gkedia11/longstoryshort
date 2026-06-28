@@ -21,8 +21,7 @@ export default function LoginPage() {
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-[#52615a]">
             Use your email and password to access submitted orders, checkout
-            state, payment status, and whether the manuscript workflow has
-            been started.
+            state, payment status, and manuscript progress.
           </p>
         </div>
         <AuthPanel />
