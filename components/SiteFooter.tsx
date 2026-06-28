@@ -9,7 +9,7 @@ export function SiteFooter() {
         <div className="space-y-5">
           <Logo compact />
           <p className="max-w-sm text-sm leading-7 text-white/68">
-            Complete fiction manuscripts from a focused story idea, delivered by
+            Complete novel manuscripts from a focused story idea, delivered by
             email without a subscription.
           </p>
         </div>

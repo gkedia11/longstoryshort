@@ -12,7 +12,7 @@ export default function PrivacyPage() {
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-white/72">
               This policy explains what the service collects to create and
-              deliver manuscript orders.
+              deliver novel manuscript orders.
             </p>
           </div>
         </section>
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
               <p className="mt-3">
                 We collect account email, name, selected genre, story summary,
                 checkout identifiers, payment status, and order status needed
-                to fulfill manuscript orders.
+                to fulfill novel manuscript orders.
               </p>
             </section>
             <section>
@@ -34,8 +34,8 @@ export default function PrivacyPage() {
               </h2>
               <p className="mt-3">
                 Order details are used to save your request, process payment,
-                prepare the manuscript after payment confirmation, and email
-                the completed manuscript.
+                prepare the novel manuscript after payment confirmation, and email
+                the completed novel manuscript.
               </p>
             </section>
             <section>
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
               <p className="mt-3">
                 Payments are processed by a secure checkout provider. After
                 successful payment, order details are shared with the providers
-                needed to prepare and deliver the manuscript.
+                needed to prepare and deliver the manuscript for your novel.
               </p>
             </section>
             <section>

@@ -11,7 +11,7 @@ export default function TermsPage() {
               Terms of Service
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-white/72">
-              These terms describe the manuscript ordering service and checkout
+              These terms describe the novel manuscript ordering service and checkout
               expectations.
             </p>
           </div>
@@ -23,7 +23,7 @@ export default function TermsPage() {
                 Service
               </h2>
               <p className="mt-3">
-                Longstory Short Story creates a complete fiction manuscript from
+                Longstory Short Story creates a complete novel manuscript from
                 the genre and story summary submitted by the customer.
               </p>
             </section>
@@ -32,8 +32,8 @@ export default function TermsPage() {
                 Price and payment
               </h2>
               <p className="mt-3">
-                Each manuscript order costs {site.price}. Payment is processed
-                through secure checkout before work begins on the manuscript.
+                Each novel manuscript order costs {site.price}. Payment is processed
+                through secure checkout before work begins on the manuscript for your novel.
               </p>
             </section>
             <section>

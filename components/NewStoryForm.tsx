@@ -27,7 +27,7 @@ export function NewStoryForm() {
   });
   const [message, setMessage] = useState(
     supabase
-      ? "Tell us the manuscript you want. Your summary is saved before checkout."
+      ? "Tell us the novel manuscript you want. Your summary is saved before checkout."
       : (configError ?? "Supabase browser keys are not configured yet."),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -204,7 +204,7 @@ export function NewStoryForm() {
           className="field mt-2 min-h-48 resize-y"
           value={form.summary}
           onChange={(event) => updateField("summary", event.target.value)}
-          placeholder="Describe the premise, main characters, setting, tone, ending preferences, and anything the manuscript should include."
+          placeholder="Describe the premise, main characters, setting, tone, ending preferences, and anything the novel manuscript should include."
           minLength={40}
           maxLength={5000}
           required
@@ -223,7 +223,7 @@ export function NewStoryForm() {
             className="mt-1 shrink-0 text-[#007a4d]"
           />
           <span>
-            Your order is saved before checkout. Work on the manuscript begins
+            Your order is saved before checkout. Work on your novel manuscript begins
             after payment confirmation.
           </span>
         </div>

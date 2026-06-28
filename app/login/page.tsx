@@ -17,11 +17,11 @@ export default function LoginPage() {
       <section className="mx-auto grid max-w-6xl gap-10 py-16 lg:grid-cols-[1fr_0.86fr] lg:items-center">
         <div>
           <h1 className="text-5xl font-semibold leading-[1.05] sm:text-6xl">
-            Sign in to manage your manuscripts.
+            Sign in to manage your novel manuscripts.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-[#52615a]">
             Use your email and password to access submitted orders, checkout
-            state, payment status, and manuscript progress.
+            state, payment status, and novel manuscript progress.
           </p>
         </div>
         <AuthPanel />

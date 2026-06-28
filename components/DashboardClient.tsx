@@ -36,7 +36,7 @@ export function DashboardClient() {
   const [orders, setOrders] = useState<StoryOrder[]>([]);
   const [message, setMessage] = useState(
     supabase
-      ? "Loading your manuscript orders..."
+      ? "Loading your novel manuscript orders..."
       : (configError ?? "Supabase browser keys are not configured yet."),
   );
   const [isLoading, setIsLoading] = useState(Boolean(supabase));
@@ -47,7 +47,7 @@ export function DashboardClient() {
   async function loadOrders() {
     if (!supabase) return;
     setIsLoading(true);
-    setMessage("Loading your manuscript orders...");
+    setMessage("Loading your novel manuscript orders...");
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
       window.location.href = "/login";
@@ -70,8 +70,8 @@ export function DashboardClient() {
     setOrders((data ?? []) as StoryOrder[]);
     setMessage(
       data?.length
-        ? "Your latest manuscript orders are below."
-        : "No manuscript orders yet.",
+        ? "Your latest novel manuscript orders are below."
+        : "No novel manuscript orders yet.",
     );
   }
 
@@ -105,8 +105,8 @@ export function DashboardClient() {
       setOrders((data ?? []) as StoryOrder[]);
       setMessage(
         data?.length
-          ? "Your latest manuscript orders are below."
-          : "No manuscript orders yet.",
+          ? "Your latest novel manuscript orders are below."
+          : "No novel manuscript orders yet.",
       );
     }
 
@@ -155,7 +155,7 @@ export function DashboardClient() {
       <div className="flex flex-col gap-5 border-b border-[#dbe5df] pb-8 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-4xl font-semibold text-[#101513]">
-            Manuscript dashboard
+            Novel manuscript dashboard
           </h1>
           <p className="mt-3 max-w-2xl leading-7 text-[#52615a]">{message}</p>
         </div>
@@ -254,7 +254,7 @@ export function DashboardClient() {
       ) : (
         <div className="mt-8 rounded-lg border border-[#dbe5df] bg-white p-8 shadow-sm">
           <h2 className="text-2xl font-semibold text-[#101513]">
-            Start your first manuscript.
+            Start your first novel manuscript.
           </h2>
           <p className="mt-3 max-w-2xl leading-7 text-[#52615a]">
             Submit a premise, save the order, and continue to the secured

@@ -24,7 +24,7 @@ export default async function PaymentSuccessPage({
           Payment received.
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-[#52615a]">
-          Thank you for your purchase. Your complete manuscript will be emailed
+          Thank you for your purchase. Your complete novel manuscript will be emailed
           in {site.delivery}. If you have any questions, please write to{" "}
           <a
             href={`mailto:${site.supportEmail}`}

@@ -28,8 +28,8 @@ const steps = [
     icon: CreditCard,
   },
   {
-    title: "Receive the manuscript",
-    text: "After checkout is complete, we prepare your manuscript and send it to your inbox.",
+    title: "Receive the novel manuscript",
+    text: "After checkout is complete, we prepare your novel manuscript and send it to your inbox.",
     icon: Mail,
   },
 ];
@@ -43,7 +43,7 @@ const examples = [
 
 const assurances = [
   "No subscription",
-  "One complete fiction manuscript",
+  "One complete novel manuscript",
   "Secure checkout",
   "Dashboard order tracking",
   "Email delivery updates",
@@ -54,12 +54,12 @@ const faqs = [
   {
     question: "What do I receive?",
     answer:
-      "A complete fiction manuscript based on the genre and story summary you submit. The finished draft is delivered by email.",
+      "A complete novel manuscript based on the genre and story summary you submit. The finished draft is delivered by email.",
   },
   {
     question: "When do you start work on my book?",
     answer:
-      "We begin after your order is complete. Your manuscript is then prepared and emailed in about 45 minutes.",
+      "We begin after your order is complete. Your novel manuscript is then prepared and emailed in about 45 minutes.",
   },
   {
     question: "How long does delivery take?",
@@ -69,7 +69,7 @@ const faqs = [
   {
     question: "Is this a subscription?",
     answer:
-      "No. Longstory Short Story uses a single $29.99 checkout for each manuscript order.",
+      "No. Longstory Short Story uses a single $29.99 checkout for each novel manuscript order.",
   },
 ];
 
@@ -97,7 +97,7 @@ export default function Home() {
               </h1>
               <p className="mt-7 max-w-2xl text-xl leading-8 text-white/82 sm:text-2xl sm:leading-9">
                 Give us a genre and a story idea. Get a complete fiction
-                manuscript emailed in {site.delivery} for {site.price}, with no
+                novel manuscript emailed in {site.delivery} for {site.price}, with no
                 subscription.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -105,7 +105,7 @@ export default function Home() {
                   href="/new-story"
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-base font-semibold text-[#07110d] shadow-lg shadow-black/20 transition hover:bg-[#d9f4e9]"
                 >
-                  Start your manuscript
+                  Start your novel manuscript
                   <ArrowRight aria-hidden="true" size={18} />
                 </Link>
                 <Link
@@ -128,7 +128,7 @@ export default function Home() {
                 </div>
                 <div>
                   <dt className="text-2xl font-semibold text-white">1</dt>
-                  <dd className="mt-1">complete manuscript</dd>
+                  <dd className="mt-1">complete novel manuscript</dd>
                 </div>
               </dl>
             </div>
@@ -145,7 +145,7 @@ export default function Home() {
               },
               {
                 title: "Work begins after checkout",
-                text: "Your manuscript is prepared after your order is complete.",
+                text: "Your novel manuscript is prepared after your order is complete.",
                 icon: ShieldCheck,
               },
               {
@@ -181,7 +181,7 @@ export default function Home() {
               </h2>
               <p className="mt-5 text-lg leading-8 text-[#52615a]">
                 The flow is intentionally simple: capture the story, collect
-                payment, prepare the manuscript, and keep order status visible
+                payment, prepare the novel manuscript, and keep order status visible
                 in the dashboard.
               </p>
             </div>
@@ -219,7 +219,7 @@ export default function Home() {
               <p className="mt-5 text-lg leading-8 text-white/70">
                 Use the summary field to define characters, twists, tone,
                 setting, ending preferences, or constraints. The more specific
-                the idea, the better the manuscript direction.
+                the idea, the better the book direction.
               </p>
               <div className="mt-8 grid grid-cols-2 gap-3 text-sm text-white/72">
                 {assurances.map((item) => (
@@ -254,11 +254,11 @@ export default function Home() {
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
               <h2 className="text-4xl font-semibold text-[#101513] sm:text-5xl">
-                One manuscript. One price.
+                One novel manuscript. One price.
               </h2>
               <p className="mt-5 text-lg leading-8 text-[#52615a]">
                 Longstory Short Story is built for a clean transaction:
-                describe the book, pay once, and receive the manuscript by
+                describe the book, pay once, and receive your novel manuscript by
                 email.
               </p>
             </div>
@@ -266,7 +266,7 @@ export default function Home() {
               <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-sm font-semibold uppercase text-[#007a4d]">
-                    Complete manuscript
+                    Complete novel manuscript
                   </p>
                   <p className="mt-4 text-6xl font-semibold text-[#101513]">
                     {site.price}
@@ -284,7 +284,7 @@ export default function Home() {
               <div className="mt-8 grid gap-3 border-t border-[#dbe5df] pt-6 text-sm text-[#52615a] sm:grid-cols-2">
                 <p>Secure checkout with promotion-code support.</p>
                 <p>Order status remains visible in your dashboard.</p>
-                <p>Your manuscript is prepared after checkout is complete.</p>
+                <p>Your novel manuscript is prepared after checkout is complete.</p>
                 <p>Support at {site.supportEmail}.</p>
               </div>
             </div>
@@ -364,7 +364,7 @@ export default function Home() {
           <div className="mx-auto flex max-w-7xl flex-col gap-6 border-y border-[#dbe5df] py-10 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 className="text-3xl font-semibold text-[#101513]">
-                Ready to shape your manuscript?
+                Ready to shape your novel manuscript?
               </h2>
               <p className="mt-3 text-[#52615a]">
                 Sign in, submit your story summary, and continue to checkout.
