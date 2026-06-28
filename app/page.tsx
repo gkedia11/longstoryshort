@@ -302,7 +302,7 @@ export default function Home() {
                 },
                 {
                   quote:
-                    "I liked how the voice stayed consistent from the first page to the ending. It read like a real draft, not a pile of disconnected scenes.",
+                    "I published the novel last week, and it feels good to finally have it out there. Now I am excited to see it start earning passive income over time.",
                   name: "Daniel Reyes",
                 },
                 {
