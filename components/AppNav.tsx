@@ -32,7 +32,7 @@ export function AppNav() {
                 key={link.href}
                 href={link.href}
                 className={[
-                  "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
+                  "inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
                   active
                     ? "bg-white text-[#07110d]"
                     : "bg-white/8 text-white/76 hover:bg-white/14 hover:text-white",
@@ -46,7 +46,7 @@ export function AppNav() {
           <button
             type="button"
             onClick={signOut}
-            className="inline-flex items-center gap-2 rounded-full bg-white/8 px-4 py-2 text-sm font-semibold text-white/76 transition hover:bg-white/14 hover:text-white"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white/8 px-4 py-2 text-sm font-semibold text-white/76 transition hover:bg-white/14 hover:text-white"
           >
             <LogOut aria-hidden="true" size={16} />
             Sign out

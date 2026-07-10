@@ -1,13 +1,14 @@
 import Link from "next/link";
-import Image from "next/image";
+import type { Metadata } from "next";
 import {
   ArrowRight,
+  BadgeDollarSign,
   BookOpen,
   CheckCircle2,
-  Clock,
   CreditCard,
   FileText,
   LockKeyhole,
+  LibraryBig,
   Mail,
   PenLine,
   ShieldCheck,
@@ -15,6 +16,12 @@ import {
 } from "lucide-react";
 import { MarketingShell } from "@/components/MarketingShell";
 import { site } from "@/lib/site";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+};
 
 const steps = [
   {
@@ -46,15 +53,15 @@ const assurances = [
   "One complete novel manuscript",
   "Secure checkout",
   "Dashboard order tracking",
-  "Email delivery updates",
   "Email delivery",
+  "Book ID included for support",
 ];
 
 const faqs = [
   {
     question: "What do I receive?",
     answer:
-      "A complete novel manuscript based on the genre and story summary you submit. The finished draft is delivered by email.",
+      "A complete novel manuscript based on the genre and story summary you submit, delivered by email.",
   },
   {
     question: "When do you start work on my book?",
@@ -74,89 +81,115 @@ const faqs = [
 ];
 
 export default function Home() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${site.url}/#organization`,
+        name: site.legalName,
+        alternateName: site.name,
+        url: site.url,
+        email: site.supportEmail,
+        logo: `${site.url}/brand-icon-512.png`,
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${site.url}/#website`,
+        name: site.name,
+        url: site.url,
+        publisher: { "@id": `${site.url}/#organization` },
+      },
+      {
+        "@type": "Service",
+        "@id": `${site.url}/#service`,
+        name: "Complete novel manuscript service",
+        provider: { "@id": `${site.url}/#organization` },
+        serviceType: "Novel manuscript writing service",
+        description:
+          "A service that turns a genre and story idea into a complete novel manuscript delivered by email.",
+        areaServed: "US",
+        offers: {
+          "@type": "Offer",
+          price: site.priceCents / 100,
+          priceCurrency: site.currency.toUpperCase(),
+          availability: "https://schema.org/InStock",
+          url: `${site.url}/#pricing`,
+        },
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${site.url}/#faq`,
+        mainEntity: faqs.map((faq) => ({
+          "@type": "Question",
+          name: faq.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: faq.answer,
+          },
+        })),
+      },
+    ],
+  };
+
   return (
     <MarketingShell>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <main>
-        <section className="relative min-h-[86svh] overflow-hidden bg-[#07110d] text-white">
-          <Image
-            src="/hero-manuscript.png"
-            alt=""
+        <section className="relative isolate min-h-[76svh] overflow-hidden bg-[#07110d] text-white md:min-h-[92svh]">
+          <div
             aria-hidden="true"
-            fill
-            unoptimized
-            priority
-            sizes="100vw"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 scale-[1.18] bg-cover bg-center md:scale-100"
+            style={{ backgroundImage: "url('/home-hero-library.jpg')" }}
           />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,17,13,0.96)_0%,rgba(7,17,13,0.78)_42%,rgba(7,17,13,0.28)_100%)]" />
+          <div className="absolute inset-0 bg-black/30 md:bg-black/20" />
+          <div className="absolute inset-0 bg-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(0deg,#f7faf7_0%,rgba(247,250,247,0)_100%)]" />
-          <div className="relative mx-auto flex min-h-[86svh] max-w-7xl items-center px-4 pb-24 pt-28 sm:px-6 lg:px-8">
-            <div className="max-w-3xl motion-safe-rise">
-              <h1 className="text-5xl font-semibold leading-[1.02] text-white sm:text-6xl lg:text-7xl">
-                Longstory Short Story
+          <div className="relative z-10 mx-auto flex min-h-[76svh] max-w-7xl items-center justify-center px-4 pb-16 pt-24 text-center sm:px-6 md:min-h-[92svh] md:pb-24 md:pt-28 lg:px-8">
+            <div className="mx-auto max-w-5xl md:-translate-y-4">
+              <h1 className="text-[2.4rem] font-black uppercase leading-[1.02] text-white drop-shadow-[0_5px_14px_rgba(0,0,0,0.62)] sm:text-6xl lg:text-7xl">
+                Turn your idea into a complete novel
               </h1>
-              <p className="mt-7 max-w-2xl text-xl leading-8 text-white/82 sm:text-2xl sm:leading-9">
-                Give us a genre and a story idea. Get a complete fiction
-                novel manuscript emailed in {site.delivery} for {site.price}, with no
-                subscription.
+              <p className="mx-auto mt-4 max-w-[21rem] text-base leading-7 text-white/90 drop-shadow-[0_3px_10px_rgba(0,0,0,0.62)] sm:mt-5 sm:max-w-3xl sm:text-xl sm:leading-9">
+                Share your genre and story idea. Receive a complete fiction
+                novel manuscript by email for {site.price}, with no subscription.
               </p>
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/new-story"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-base font-semibold text-[#07110d] shadow-lg shadow-black/20 transition hover:bg-[#d9f4e9]"
-                >
-                  Start your novel manuscript
-                  <ArrowRight aria-hidden="true" size={18} />
-                </Link>
-                <Link
-                  href="/#how-it-works"
-                  className="inline-flex items-center justify-center rounded-full border border-white/28 px-6 py-3.5 text-base font-semibold text-white transition hover:border-white/60 hover:bg-white/10"
-                >
-                  See how it works
-                </Link>
-              </div>
-              <dl className="mt-10 grid max-w-2xl gap-5 text-sm text-white/72 sm:grid-cols-3">
-                <div>
-                  <dt className="text-2xl font-semibold text-white">
-                    {site.price}
-                  </dt>
-                  <dd className="mt-1">one-time payment</dd>
-                </div>
-                <div>
-                  <dt className="text-2xl font-semibold text-white">45 min</dt>
-                  <dd className="mt-1">target email delivery</dd>
-                </div>
-                <div>
-                  <dt className="text-2xl font-semibold text-white">1</dt>
-                  <dd className="mt-1">complete novel manuscript</dd>
-                </div>
-              </dl>
+              <Link
+                href="/new-story"
+                className="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold text-[#07110d] shadow-lg shadow-black/20 transition hover:bg-[#d9f4e9]"
+              >
+                Start your novel manuscript
+                <ArrowRight aria-hidden="true" size={18} />
+              </Link>
             </div>
           </div>
         </section>
 
-        <section className="bg-[#f7faf7] px-4 py-16 sm:px-6 lg:px-8">
+        <section className="bg-[#f7faf7] px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
           <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-3">
             {[
               {
-                title: "Built for serious drafts",
-                text: "Prompts ask for premise, genre, and direction before work begins.",
+                title: "Turn your idea into a finished book",
+                text: "Move beyond notes and unfinished chapters with a complete novel manuscript shaped around your premise, genre, and creative direction.",
                 icon: BookOpen,
               },
               {
-                title: "Work begins after checkout",
-                text: "Your novel manuscript is prepared after your order is complete.",
-                icon: ShieldCheck,
+                title: "Prepare for your publishing goals",
+                text: "Build a complete novel manuscript you can refine for ebook or print platforms and share with the readers you want to reach.",
+                icon: BadgeDollarSign,
               },
               {
-                title: "Recoverable orders",
-                text: "Your story summary stays visible in your dashboard so you can track your order.",
-                icon: Clock,
+                title: "Build your author catalog",
+                text: "Create more books from the ideas you already have, giving readers more to discover and helping your author brand grow.",
+                icon: LibraryBig,
               },
             ].map((item) => (
               <article
                 key={item.title}
-                className="rounded-lg border border-[#dbe5df] bg-white p-6 shadow-sm"
+                className="rounded-lg border border-[#dbe5df] bg-white p-5 shadow-sm sm:p-6"
               >
                 <item.icon aria-hidden="true" className="text-[#007a4d]" />
                 <h2 className="mt-5 text-xl font-semibold text-[#101513]">
@@ -172,24 +205,24 @@ export default function Home() {
 
         <section
           id="how-it-works"
-          className="bg-white px-4 py-20 sm:px-6 lg:px-8"
+          className="bg-white px-4 py-12 sm:px-6 sm:py-20 lg:px-8"
         >
           <div className="mx-auto max-w-7xl">
             <div className="max-w-2xl">
-              <h2 className="text-4xl font-semibold text-[#101513] sm:text-5xl">
-                From idea to inbox.
+              <h2 className="text-3xl font-semibold text-[#101513] sm:text-5xl">
+                From idea to finished novel.
               </h2>
-              <p className="mt-5 text-lg leading-8 text-[#52615a]">
-                The flow is intentionally simple: capture the story, collect
-                payment, prepare the novel manuscript, and keep order status visible
-                in the dashboard.
+              <p className="mt-4 text-base leading-7 text-[#52615a] sm:mt-5 sm:text-lg sm:leading-8">
+                Share your premise and creative preferences. We develop the
+                plot, outline the story, write the complete novel manuscript,
+                and proofread it before delivery.
               </p>
             </div>
-            <div className="mt-12 grid gap-5 lg:grid-cols-3">
+            <div className="mt-8 grid gap-4 sm:mt-12 sm:gap-5 lg:grid-cols-3">
               {steps.map((step, index) => (
                 <article
                   key={step.title}
-                  className="rounded-lg border border-[#dbe5df] bg-[#f7faf7] p-7"
+                  className="rounded-lg border border-[#dbe5df] bg-[#f7faf7] p-5 sm:p-7"
                 >
                   <div className="flex items-center justify-between">
                     <step.icon aria-hidden="true" className="text-[#007a4d]" />
@@ -197,10 +230,10 @@ export default function Home() {
                       0{index + 1}
                     </span>
                   </div>
-                  <h3 className="mt-8 text-2xl font-semibold text-[#101513]">
+                  <h3 className="mt-6 text-xl font-semibold text-[#101513] sm:mt-8 sm:text-2xl">
                     {step.title}
                   </h3>
-                  <p className="mt-4 leading-7 text-[#52615a]">{step.text}</p>
+                  <p className="mt-3 leading-7 text-[#52615a] sm:mt-4">{step.text}</p>
                 </article>
               ))}
             </div>
@@ -209,19 +242,19 @@ export default function Home() {
 
         <section
           id="examples"
-          className="bg-[#07110d] px-4 py-20 text-white sm:px-6 lg:px-8"
+          className="bg-[#07110d] px-4 py-12 text-white sm:px-6 sm:py-20 lg:px-8"
         >
           <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
             <div>
-              <h2 className="text-4xl font-semibold sm:text-5xl">
-                Bring a premise. Leave with a draft.
+              <h2 className="text-3xl font-semibold sm:text-5xl">
+                Bring a premise. Leave with a finished novel.
               </h2>
-              <p className="mt-5 text-lg leading-8 text-white/70">
+              <p className="mt-4 text-base leading-7 text-white/70 sm:mt-5 sm:text-lg sm:leading-8">
                 Use the summary field to define characters, twists, tone,
                 setting, ending preferences, or constraints. The more specific
                 the idea, the better the book direction.
               </p>
-              <div className="mt-8 grid grid-cols-2 gap-3 text-sm text-white/72">
+              <div className="mt-6 grid gap-3 text-sm text-white/72 sm:mt-8 sm:grid-cols-2">
                 {assurances.map((item) => (
                   <div key={item} className="flex items-center gap-2">
                     <CheckCircle2
@@ -249,88 +282,115 @@ export default function Home() {
 
         <section
           id="pricing"
-          className="bg-[#f7faf7] px-4 py-20 sm:px-6 lg:px-8"
+          className="bg-[#f7faf7] px-4 py-12 sm:px-6 sm:py-20 lg:px-8"
         >
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
-              <h2 className="text-4xl font-semibold text-[#101513] sm:text-5xl">
+              <h2 className="text-3xl font-semibold text-[#101513] sm:text-5xl">
                 One novel manuscript. One price.
               </h2>
-              <p className="mt-5 text-lg leading-8 text-[#52615a]">
-                Longstory Short Story is built for a clean transaction:
-                describe the book, pay once, and receive your novel manuscript by
-                email.
+              <p className="mt-4 text-base leading-7 text-[#52615a] sm:mt-5 sm:text-lg sm:leading-8">
+                One payment covers every stage needed to turn your idea into a
+                polished novel manuscript, from story development through
+                proofreading.
               </p>
             </div>
-            <div className="rounded-lg border border-[#dbe5df] bg-white p-8 shadow-sm">
+            <div className="rounded-lg border border-[#dbe5df] bg-white p-5 shadow-sm sm:p-8">
               <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-sm font-semibold uppercase text-[#007a4d]">
                     Complete novel manuscript
                   </p>
-                  <p className="mt-4 text-6xl font-semibold text-[#101513]">
+                  <p className="mt-3 text-5xl font-semibold text-[#101513] sm:mt-4 sm:text-6xl">
                     {site.price}
                   </p>
-                  <p className="mt-3 text-[#52615a]">No tiers. No renewal.</p>
+                  <p className="mt-3 text-[#52615a]">One simple price</p>
                 </div>
                 <Link
                   href="/new-story"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#007a4d] px-6 py-3.5 font-semibold text-white transition hover:bg-[#004d33]"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#007a4d] px-6 py-3.5 font-semibold text-white transition hover:bg-[#004d33] sm:w-auto"
                 >
                   Start checkout
                   <ArrowRight aria-hidden="true" size={18} />
                 </Link>
               </div>
-              <div className="mt-8 grid gap-3 border-t border-[#dbe5df] pt-6 text-sm text-[#52615a] sm:grid-cols-2">
-                <p>Secure checkout with promotion-code support.</p>
-                <p>Order status remains visible in your dashboard.</p>
-                <p>Your novel manuscript is prepared after checkout is complete.</p>
-                <p>Support at {site.supportEmail}.</p>
+              <div className="mt-8 border-t border-[#dbe5df] pt-6">
+                <p className="text-sm font-semibold uppercase text-[#101513]">
+                  Included with every order
+                </p>
+                <div className="mt-4 grid gap-3 text-sm text-[#52615a] sm:grid-cols-2">
+                  {[
+                    "Plot and character development",
+                    "Story structure and detailed outlining",
+                    "Complete novel manuscript writing",
+                    "Proofreading for clarity and consistency",
+                  ].map((item) => (
+                    <div key={item} className="flex items-start gap-2.5">
+                      <CheckCircle2
+                        aria-hidden="true"
+                        className="mt-0.5 shrink-0 text-[#007a4d]"
+                        size={17}
+                      />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-5 text-sm leading-6 text-[#52615a]">
+                  One payment covers the full process from your original idea to a
+                  polished novel manuscript ready for your next publishing step.
+                </p>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
+        <section className="bg-white px-4 py-12 sm:px-6 sm:py-20 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <div className="grid gap-5 md:grid-cols-3">
+            <div className="max-w-2xl">
+              <h2 className="text-3xl font-semibold text-[#101513] sm:text-4xl">
+                A practical next step for your story idea.
+              </h2>
+              <p className="mt-4 leading-7 text-[#52615a]">
+                Whether your goal is to publish, build an author catalog, or
+                finally finish the story you have been carrying, you leave with
+                a complete novel manuscript to take forward.
+              </p>
+            </div>
+            <div className="mt-8 grid gap-5 md:grid-cols-3">
               {[
                 {
-                  quote:
-                    "The finished mystery had a clean pace, a satisfying twist, and chapters that actually felt like they belonged together.",
-                  name: "Marissa Cole",
+                  title: "A coherent, complete story",
+                  text: "Your premise is developed into a structured narrative with characters, pacing, and a satisfying ending.",
+                  icon: BookOpen,
                 },
                 {
-                  quote:
-                    "I published the novel last week, and it feels good to finally have it out there. Now I am excited to see it start earning passive income over time.",
-                  name: "Daniel Reyes",
+                  title: "A novel manuscript for your next step",
+                  text: "Receive a full novel manuscript you can review, personalize, and prepare for your preferred publishing path.",
+                  icon: FileText,
                 },
                 {
-                  quote:
-                    "The story kept the tone I asked for: warm, dramatic, and a little sharp. It gave me a complete book I could keep shaping.",
-                  name: "Nadia Whitaker",
+                  title: "More ideas turned into books",
+                  text: "Move promising concepts out of your notes and into a growing catalog of finished creative work.",
+                  icon: LibraryBig,
                 },
-              ].map((testimonial) => (
-                <figure
-                  key={testimonial.name}
-                  className="rounded-lg border border-[#dbe5df] bg-[#f7faf7] p-6"
+              ].map((item) => (
+                <article
+                  key={item.title}
+                  className="rounded-lg border border-[#dbe5df] bg-[#f7faf7] p-5 sm:p-6"
                 >
-                  <blockquote className="leading-7 text-[#34423c]">
-                    “{testimonial.quote}”
-                  </blockquote>
-                  <figcaption className="mt-5 text-sm font-semibold text-[#007a4d]">
-                    {testimonial.name}
-                  </figcaption>
-                </figure>
+                  <item.icon aria-hidden="true" className="text-[#007a4d]" />
+                  <h3 className="mt-5 text-xl font-semibold text-[#101513]">{item.title}</h3>
+                  <p className="mt-3 leading-7 text-[#52615a]">{item.text}</p>
+                </article>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="bg-[#f7faf7] px-4 py-20 sm:px-6 lg:px-8">
+        <section className="bg-[#f7faf7] px-4 py-12 sm:px-6 sm:py-20 lg:px-8">
           <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.8fr_1.2fr]">
             <div>
-              <h2 className="text-4xl font-semibold text-[#101513]">
+              <h2 className="text-3xl font-semibold text-[#101513] sm:text-4xl">
                 Questions before you start.
               </h2>
               <p className="mt-5 leading-8 text-[#52615a]">
@@ -360,10 +420,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
+        <section className="bg-white px-4 py-12 sm:px-6 sm:py-20 lg:px-8">
           <div className="mx-auto flex max-w-7xl flex-col gap-6 border-y border-[#dbe5df] py-10 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-3xl font-semibold text-[#101513]">
+              <h2 className="text-2xl font-semibold text-[#101513] sm:text-3xl">
                 Ready to shape your novel manuscript?
               </h2>
               <p className="mt-3 text-[#52615a]">
@@ -372,7 +432,7 @@ export default function Home() {
             </div>
             <Link
               href="/new-story"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#07110d] px-6 py-3.5 font-semibold text-white transition hover:bg-[#004d33]"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#07110d] px-6 py-3.5 font-semibold text-white transition hover:bg-[#004d33] sm:w-auto"
             >
               Create an order
               <Sparkles aria-hidden="true" size={18} />
@@ -380,7 +440,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-[#07110d] px-4 py-10 text-white sm:px-6 lg:px-8">
+        <section className="bg-[#07110d] px-4 py-8 text-white sm:px-6 sm:py-10 lg:px-8">
           <div className="mx-auto grid max-w-7xl gap-4 text-sm text-white/70 sm:grid-cols-3">
             <div className="flex items-center gap-3">
               <LockKeyhole aria-hidden="true" size={18} />

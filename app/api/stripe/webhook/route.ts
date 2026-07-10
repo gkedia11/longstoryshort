@@ -14,6 +14,7 @@ async function sendToN8n(orderId: string, stripeSessionId: string) {
 
   const payload = {
     order_id: order.id,
+    book_id: order.id,
     stripe_checkout_session_id: stripeSessionId,
     user_id: order.user_id,
     name: order.name,
@@ -76,11 +77,10 @@ export async function POST(request: Request) {
       return Response.json({ received: true, waiting_for_payment: true });
     }
 
-    const n8nResult = await sendToN8n(orderId, session.id);
-    return Response.json({ received: true, n8n: n8nResult });
+    await sendToN8n(orderId, session.id);
+    return Response.json({ received: true });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Webhook could not be processed.";
-    return Response.json({ error: message }, { status: 400 });
+    console.error("Legacy payment notification failed", error);
+    return Response.json({ error: "Payment notification could not be processed." }, { status: 400 });
   }
 }

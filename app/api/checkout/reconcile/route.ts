@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     }
 
     if (order.story_status === "sent_to_n8n") {
-      return Response.json({ status: "sent_to_n8n" });
+      return Response.json({ status: "being_written" });
     }
 
     const squareOrderId = order.stripe_checkout_session_id;
@@ -44,15 +44,17 @@ export async function POST(request: Request) {
 
     const tenderPaymentId = squareOrder.tenders?.find((tender) => tender.payment_id)
       ?.payment_id;
-    const n8n = await sendStoryOrderToN8n(
+    await sendStoryOrderToN8n(
       order.id,
       tenderPaymentId ?? `square-order-${squareOrder.id}`,
     );
 
-    return Response.json({ status: "sent_to_n8n", n8n });
+    return Response.json({ status: "being_written" });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Payment could not be verified.";
-    return Response.json({ error: message }, { status: 500 });
+    console.error("Payment reconciliation failed", error);
+    return Response.json(
+      { error: "Payment confirmation is taking longer than expected." },
+      { status: 500 },
+    );
   }
 }

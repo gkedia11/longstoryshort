@@ -2,28 +2,24 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { KeyRound, Mail } from "lucide-react";
-import {
-  getSupabaseBrowserClient,
-  getSupabaseBrowserConfigError,
-} from "@/lib/supabase/client";
+import { KeyRound, LogIn, Mail, UserPlus } from "lucide-react";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-type AuthMode = "signIn" | "resetRequest" | "updatePassword";
+type AuthMode = "signIn" | "signUp" | "resetRequest" | "updatePassword";
+
+const unavailableMessage =
+  "Account access is temporarily unavailable. Please try again later.";
 
 export function AuthPanel() {
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
-  const configError = getSupabaseBrowserConfigError();
-  const fallbackEmail = process.env.NEXT_PUBLIC_TEST_EMAIL ?? "";
-  const [email, setEmail] = useState(fallbackEmail);
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [mode, setMode] = useState<AuthMode>("signIn");
   const [message, setMessage] = useState(
-    supabase
-      ? "Enter your email and password to sign in."
-      : (configError ?? "Supabase browser keys are not configured yet."),
+    supabase ? "Enter your email and password to sign in." : unavailableMessage,
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,13 +40,20 @@ export function AuthPanel() {
     });
 
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session && !isRecoveryUrl) {
-        router.replace("/dashboard");
-      }
+      if (data.session && !isRecoveryUrl) router.replace("/dashboard");
     });
 
     return () => subscription.unsubscribe();
   }, [router, supabase]);
+
+  function setAuthMode(nextMode: "signIn" | "signUp") {
+    setMode(nextMode);
+    setMessage(
+      nextMode === "signIn"
+        ? "Enter your email and password to sign in."
+        : "Create an account to place and track novel manuscript orders.",
+    );
+  }
 
   async function handleSignIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -58,54 +61,71 @@ export function AuthPanel() {
     setIsSubmitting(true);
     setMessage("Signing you in...");
 
-    const signInResult = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (!signInResult.error) {
-      setIsSubmitting(false);
-      setMessage("Signed in. Taking you to your dashboard...");
-      router.replace("/dashboard");
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setIsSubmitting(false);
+    if (error) {
+      setMessage(
+        "Login did not work. Check your email and password, or reset your password if you forgot it.",
+      );
       return;
     }
 
-    setIsSubmitting(false);
-    setMessage(
-      "Login did not work. Check your email and password, or reset your password if you forgot it.",
-    );
+    setMessage("Signed in. Taking you to your dashboard...");
+    router.replace("/dashboard");
   }
 
-  async function handleCreateAccount() {
+  async function handleSignUp(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     if (!supabase) return;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setMessage("Enter a valid email address before creating an account.");
-      return;
-    }
-    if (password.length < 8) {
-      setMessage("Enter a password with at least 8 characters before creating an account.");
+    if (password !== confirmPassword) {
+      setMessage("The passwords do not match.");
       return;
     }
 
     setIsSubmitting(true);
     setMessage("Creating your account...");
-
-    const signUpResult = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
+        data: { full_name: fullName.trim() },
       },
     });
-
     setIsSubmitting(false);
-    if (signUpResult.error) {
-      setMessage(signUpResult.error.message);
+
+    if (error) {
+      setMessage(
+        "We could not create the account. Check your details or try signing in if you already have an account.",
+      );
       return;
     }
 
-    setMode("signIn");
-    setMessage("Your account is ready. Sign in with your email and password.");
+    if (data.session) {
+      setMessage("Account created. Taking you to your dashboard...");
+      router.replace("/dashboard");
+      return;
+    }
+
+    setMessage("Check your email to confirm your account, then sign in.");
+  }
+
+  async function handleGoogleSignIn() {
+    if (!supabase) return;
+    setIsSubmitting(true);
+    setMessage("Opening Google sign-in...");
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
+    });
+
+    if (error) {
+      setIsSubmitting(false);
+      setMessage("Google sign-in could not be started. Please try again.");
+    }
   }
 
   async function handlePasswordResetRequest(event: FormEvent<HTMLFormElement>) {
@@ -117,20 +137,17 @@ export function AuthPanel() {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/login`,
     });
-
     setIsSubmitting(false);
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
-
-    setMessage("Password reset email sent. Open the email to choose a new password.");
+    setMessage(
+      error
+        ? "We could not send the reset email. Check the address and try again."
+        : "Password reset email sent. Open it to choose a new password.",
+    );
   }
 
   async function handlePasswordUpdate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!supabase) return;
-
     if (newPassword !== confirmPassword) {
       setMessage("The new passwords do not match.");
       return;
@@ -139,10 +156,10 @@ export function AuthPanel() {
     setIsSubmitting(true);
     setMessage("Updating your password...");
     const { error } = await supabase.auth.updateUser({ password: newPassword });
-
     setIsSubmitting(false);
+
     if (error) {
-      setMessage(error.message);
+      setMessage("We could not change your password. Please try the reset link again.");
       return;
     }
 
@@ -150,63 +167,35 @@ export function AuthPanel() {
     router.replace("/dashboard");
   }
 
-  function showSignIn() {
-    setMode("signIn");
-    setMessage("Enter your email and password to sign in.");
-  }
+  const status = (
+    <p role="status" aria-live="polite" className="mt-5 text-sm leading-6 text-[#52615a]">
+      {message}
+    </p>
+  );
 
   if (mode === "updatePassword") {
     return (
       <div className="rounded-lg border border-[#dbe5df] bg-white p-6 shadow-sm sm:p-8">
         <form onSubmit={handlePasswordUpdate} className="space-y-5">
-          <div>
-            <label
-              htmlFor="new-password"
-              className="text-sm font-semibold text-[#101513]"
-            >
-              New password
-            </label>
-            <input
-              id="new-password"
-              type="password"
-              autoComplete="new-password"
-              className="field mt-2"
-              value={newPassword}
-              onChange={(event) => setNewPassword(event.target.value)}
-              disabled={!supabase || isSubmitting}
-              required
-              minLength={8}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="confirm-password"
-              className="text-sm font-semibold text-[#101513]"
-            >
-              Confirm new password
-            </label>
-            <input
-              id="confirm-password"
-              type="password"
-              autoComplete="new-password"
-              className="field mt-2"
-              value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)}
-              disabled={!supabase || isSubmitting}
-              required
-              minLength={8}
-            />
-          </div>
-          <button
-            type="submit"
+          <PasswordField
+            id="new-password"
+            label="New password"
+            value={newPassword}
+            onChange={setNewPassword}
             disabled={!supabase || isSubmitting}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#007a4d] px-5 py-3 font-semibold text-white transition hover:bg-[#004d33] disabled:cursor-not-allowed disabled:opacity-55"
-          >
-            <KeyRound aria-hidden="true" size={18} />
+          />
+          <PasswordField
+            id="confirm-password"
+            label="Confirm new password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            disabled={!supabase || isSubmitting}
+          />
+          <SubmitButton disabled={!supabase || isSubmitting} icon={KeyRound}>
             Change password
-          </button>
+          </SubmitButton>
         </form>
-        <p className="mt-5 text-sm leading-6 text-[#52615a]">{message}</p>
+        {status}
       </div>
     );
   }
@@ -215,115 +204,195 @@ export function AuthPanel() {
     return (
       <div className="rounded-lg border border-[#dbe5df] bg-white p-6 shadow-sm sm:p-8">
         <form onSubmit={handlePasswordResetRequest} className="space-y-5">
-          <div>
-            <label
-              htmlFor="reset-email"
-              className="text-sm font-semibold text-[#101513]"
-            >
-              Email address
-            </label>
-            <input
-              id="reset-email"
-              type="email"
-              autoComplete="email"
-              className="field mt-2"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              disabled={!supabase || isSubmitting}
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={!supabase || isSubmitting}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#007a4d] px-5 py-3 font-semibold text-white transition hover:bg-[#004d33] disabled:cursor-not-allowed disabled:opacity-55"
-          >
-            <Mail aria-hidden="true" size={18} />
+          <EmailField email={email} setEmail={setEmail} disabled={!supabase || isSubmitting} id="reset-email" />
+          <SubmitButton disabled={!supabase || isSubmitting} icon={Mail}>
             Send reset email
-          </button>
+          </SubmitButton>
         </form>
         <button
           type="button"
-          onClick={showSignIn}
-          className="mt-4 text-sm font-semibold text-[#007a4d] hover:text-[#004d33]"
+          onClick={() => setAuthMode("signIn")}
+          className="mt-4 min-h-11 text-sm font-semibold text-[#007a4d] hover:text-[#004d33]"
         >
           Back to sign in
         </button>
-        <p className="mt-5 text-sm leading-6 text-[#52615a]">{message}</p>
+        {status}
       </div>
     );
   }
 
   return (
     <div className="rounded-lg border border-[#dbe5df] bg-white p-6 shadow-sm sm:p-8">
-      <form onSubmit={handleSignIn} className="space-y-5">
-        <div>
-          <label
-            htmlFor="email"
-            className="text-sm font-semibold text-[#101513]"
+      <div className="grid grid-cols-2 rounded-md bg-[#eef4f0] p-1" aria-label="Account access">
+        {(["signIn", "signUp"] as const).map((item) => (
+          <button
+            key={item}
+            type="button"
+            onClick={() => setAuthMode(item)}
+            className={`min-h-11 rounded px-3 text-sm font-semibold transition ${
+              mode === item ? "bg-white text-[#101513] shadow-sm" : "text-[#52615a]"
+            }`}
           >
-            Email address
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            className="field mt-2"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            disabled={!supabase || isSubmitting}
-            required
-          />
-        </div>
-        <div>
-          <label
-            htmlFor="password"
-            className="text-sm font-semibold text-[#101513]"
-          >
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            className="field mt-2"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            disabled={!supabase || isSubmitting}
-            required
-            minLength={8}
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={!supabase || isSubmitting}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#007a4d] px-5 py-3 font-semibold text-white transition hover:bg-[#004d33] disabled:cursor-not-allowed disabled:opacity-55"
+            {item === "signIn" ? "Log in" : "Sign up"}
+          </button>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        disabled={!supabase || isSubmitting}
+        className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-full border border-[#dbe5df] bg-white px-5 py-3 font-semibold text-[#101513] transition hover:border-[#007a4d] hover:bg-[#f7faf7] disabled:cursor-not-allowed disabled:opacity-55"
+      >
+        <span
+          aria-hidden="true"
+          className="inline-flex size-6 items-center justify-center rounded-full border border-[#dbe5df] text-sm font-bold text-[#1a73e8]"
         >
-          <Mail aria-hidden="true" size={18} />
-          Sign in
-        </button>
+          G
+        </span>
+        Continue with Google
+      </button>
+
+      <div className="my-6 flex items-center gap-3 text-xs font-medium uppercase text-[#7a8a82]">
+        <span className="h-px flex-1 bg-[#dbe5df]" />
+        <span>or use email and password</span>
+        <span className="h-px flex-1 bg-[#dbe5df]" />
+      </div>
+
+      <form onSubmit={mode === "signUp" ? handleSignUp : handleSignIn} className="space-y-5">
+        {mode === "signUp" ? (
+          <div>
+            <label htmlFor="full-name" className="text-sm font-semibold text-[#101513]">Name</label>
+            <input
+              id="full-name"
+              autoComplete="name"
+              className="field mt-2"
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+              disabled={!supabase || isSubmitting}
+              required
+              minLength={2}
+            />
+          </div>
+        ) : null}
+        <EmailField email={email} setEmail={setEmail} disabled={!supabase || isSubmitting} id="email" />
+        <PasswordField
+          id="password"
+          label="Password"
+          value={password}
+          onChange={setPassword}
+          disabled={!supabase || isSubmitting}
+          autoComplete={mode === "signUp" ? "new-password" : "current-password"}
+        />
+        {mode === "signUp" ? (
+          <PasswordField
+            id="confirm-password"
+            label="Confirm password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            disabled={!supabase || isSubmitting}
+          />
+        ) : null}
+        <SubmitButton disabled={!supabase || isSubmitting} icon={mode === "signUp" ? UserPlus : LogIn}>
+          {mode === "signUp" ? "Create account" : "Log in"}
+        </SubmitButton>
       </form>
-      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold">
+
+      {mode === "signIn" ? (
         <button
           type="button"
           onClick={() => {
             setMode("resetRequest");
             setMessage("Enter your email to receive a password reset link.");
           }}
-          className="text-[#007a4d] hover:text-[#004d33]"
+          className="mt-4 min-h-11 text-sm font-semibold text-[#007a4d] hover:text-[#004d33]"
         >
           Forgot password?
         </button>
-        <button
-          type="button"
-          onClick={handleCreateAccount}
-          disabled={!supabase || isSubmitting}
-          className="text-[#007a4d] hover:text-[#004d33] disabled:cursor-not-allowed disabled:opacity-55"
-        >
-          Create account
-        </button>
-      </div>
-      <p className="mt-5 text-sm leading-6 text-[#52615a]">{message}</p>
+      ) : null}
+      {status}
     </div>
+  );
+}
+
+function EmailField({
+  email,
+  setEmail,
+  disabled,
+  id,
+}: {
+  email: string;
+  setEmail: (value: string) => void;
+  disabled: boolean;
+  id: string;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="text-sm font-semibold text-[#101513]">Email address</label>
+      <input
+        id={id}
+        type="email"
+        autoComplete="email"
+        className="field mt-2"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        disabled={disabled}
+        required
+      />
+    </div>
+  );
+}
+
+function PasswordField({
+  id,
+  label,
+  value,
+  onChange,
+  disabled,
+  autoComplete = "new-password",
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  disabled: boolean;
+  autoComplete?: "new-password" | "current-password";
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="text-sm font-semibold text-[#101513]">{label}</label>
+      <input
+        id={id}
+        type="password"
+        autoComplete={autoComplete}
+        className="field mt-2"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        disabled={disabled}
+        required
+        minLength={8}
+      />
+    </div>
+  );
+}
+
+function SubmitButton({
+  children,
+  disabled,
+  icon: Icon,
+}: {
+  children: React.ReactNode;
+  disabled: boolean;
+  icon: typeof KeyRound;
+}) {
+  return (
+    <button
+      type="submit"
+      disabled={disabled}
+      className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#007a4d] px-5 py-3 font-semibold text-white transition hover:bg-[#004d33] disabled:cursor-not-allowed disabled:opacity-55"
+    >
+      <Icon aria-hidden="true" size={18} />
+      {children}
+    </button>
   );
 }

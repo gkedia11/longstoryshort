@@ -44,7 +44,9 @@ export function PaymentSuccessStatus({ orderId }: PaymentSuccessStatusProps) {
       if (!isActive) return;
 
       if (!response.ok) {
-        setMessage(payload.error ?? "Payment is still being confirmed.");
+        setMessage(
+          "Payment confirmation is taking a little longer than expected. Your dashboard will update automatically.",
+        );
         return;
       }
 
@@ -66,11 +68,11 @@ export function PaymentSuccessStatus({ orderId }: PaymentSuccessStatusProps) {
 
   if (!supabase) {
     return (
-      <p className="mt-4 text-sm text-[#52615a]">
+      <p role="status" aria-live="polite" className="mt-4 text-sm text-[#52615a]">
         Sign in to view the latest order status on your dashboard.
       </p>
     );
   }
 
-  return <p className="mt-4 text-sm text-[#52615a]">{message}</p>;
+  return <p role="status" aria-live="polite" className="mt-4 text-sm text-[#52615a]">{message}</p>;
 }

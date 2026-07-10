@@ -5,36 +5,40 @@ import { ArrowRight, CreditCard, LockKeyhole } from "lucide-react";
 import { genres, site } from "@/lib/site";
 import {
   getSupabaseBrowserClient,
-  getSupabaseBrowserConfigError,
 } from "@/lib/supabase/client";
 
 type FormState = {
+  bookId: string;
   name: string;
   email: string;
   genre: string;
   summary: string;
 };
 
+function createBookId() {
+  return globalThis.crypto.randomUUID();
+}
+
 export function NewStoryForm() {
   const supabase = getSupabaseBrowserClient();
-  const configError = getSupabaseBrowserConfigError();
-  const fallbackEmail = process.env.NEXT_PUBLIC_TEST_EMAIL ?? "";
   const [form, setForm] = useState<FormState>({
+    bookId: typeof window === "undefined" ? "" : createBookId(),
     name: "",
-    email: fallbackEmail,
+    email: "",
     genre: genres[0],
     summary: "",
   });
   const [message, setMessage] = useState(
     supabase
-      ? "Tell us the novel manuscript you want. Your summary is saved before checkout."
-      : (configError ?? "Supabase browser keys are not configured yet."),
+      ? "Tell us about the novel you want to create."
+      : "Order access is temporarily unavailable. Please try again later.",
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validationMessage = useMemo(() => {
-    if (configError) return configError;
+    if (!supabase) return "Order access is temporarily unavailable. Please try again later.";
     if (form.name.trim().length < 2) return "Enter your name.";
+    if (!form.bookId) return "Preparing your Book ID...";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       return "Enter a valid email address.";
     }
@@ -42,7 +46,7 @@ export function NewStoryForm() {
       return "Add at least 40 characters to the story summary.";
     }
     return null;
-  }, [configError, form]);
+  }, [form, supabase]);
 
   const canSubmit = useMemo(() => {
     return (
@@ -54,16 +58,72 @@ export function NewStoryForm() {
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) {
+    let isActive = true;
+
+    async function loadIdentity() {
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
+
+      if (!isActive) return;
+
+      if (!session) {
         window.location.href = "/login";
         return;
       }
-      const sessionEmail = data.session.user.email;
-      if (sessionEmail) {
-        setForm((current) => ({ ...current, email: sessionEmail }));
-      }
-    });
+
+      const sessionEmail = session.user.email?.trim() ?? "";
+      const sessionNameCandidates = [
+        session.user.user_metadata?.full_name,
+        session.user.user_metadata?.name,
+        session.user.user_metadata?.display_name,
+      ]
+        .map((value) => (typeof value === "string" ? value.trim() : ""))
+        .filter(Boolean);
+
+      const [{ data: profile }, { data: latestOrder }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("full_name,email")
+          .eq("id", session.user.id)
+          .maybeSingle(),
+        supabase
+          .from("story_orders")
+          .select("name,email")
+          .eq("user_id", session.user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+
+      if (!isActive) return;
+
+      const profileName =
+        typeof profile?.full_name === "string" ? profile.full_name.trim() : "";
+      const profileEmail =
+        typeof profile?.email === "string" ? profile.email.trim() : "";
+      const orderName =
+        typeof latestOrder?.name === "string" ? latestOrder.name.trim() : "";
+      const orderEmail =
+        typeof latestOrder?.email === "string" ? latestOrder.email.trim() : "";
+      const fallbackName =
+        sessionNameCandidates[0] ||
+        orderName ||
+        (sessionEmail ? sessionEmail.split("@")[0].replace(/[._-]+/g, " ") : "");
+
+      setForm((current) => ({
+        ...current,
+        email:
+          current.email
+            ? current.email
+            : profileEmail || orderEmail || sessionEmail || current.email,
+        name: current.name || profileName || orderName || fallbackName,
+      }));
+    }
+
+    void loadIdentity();
+    return () => {
+      isActive = false;
+    };
   }, [supabase]);
 
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -74,7 +134,7 @@ export function NewStoryForm() {
     event.preventDefault();
     if (!supabase) return;
     setIsSubmitting(true);
-    setMessage("Saving your story summary...");
+    setMessage("Saving your order...");
 
     const { data: sessionData } = await supabase.auth.getSession();
     const session = sessionData.session;
@@ -86,6 +146,7 @@ export function NewStoryForm() {
     const { data, error } = await supabase
       .from("story_orders")
       .insert({
+        id: form.bookId,
         user_id: session.user.id,
         name: form.name.trim(),
         email: form.email.trim(),
@@ -99,9 +160,19 @@ export function NewStoryForm() {
 
     if (error || !data) {
       setIsSubmitting(false);
-      setMessage(error?.message ?? "Could not save your order.");
+      setMessage("We could not save your order. Please try again or contact support.");
+      setForm((current) => ({ ...current, bookId: createBookId() }));
       return;
     }
+
+    void supabase.from("profiles").upsert(
+      {
+        id: session.user.id,
+        email: form.email.trim(),
+        full_name: form.name.trim(),
+      },
+      { onConflict: "id" },
+    );
 
     setMessage("Opening secure checkout...");
     const response = await fetch("/api/checkout", {
@@ -119,7 +190,7 @@ export function NewStoryForm() {
 
     if (!response.ok || !payload.checkout_url) {
       setIsSubmitting(false);
-      setMessage(payload.error ?? "Could not create checkout session.");
+      setMessage("We could not open secure payment. Please try again from your dashboard.");
       return;
     }
 
@@ -131,7 +202,28 @@ export function NewStoryForm() {
       onSubmit={handleSubmit}
       className="rounded-lg border border-[#dbe5df] bg-white p-6 shadow-sm sm:p-8"
     >
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div>
+        <label
+          htmlFor="book-id"
+          className="text-sm font-semibold text-[#101513]"
+        >
+          Book ID
+        </label>
+        <input
+          id="book-id"
+          className="field mt-2 font-mono text-sm text-[#52615a]"
+          value={form.bookId}
+          readOnly
+          suppressHydrationWarning
+          aria-describedby="book-id-help"
+        />
+        <p id="book-id-help" className="mt-2 text-xs leading-5 text-[#6f7d76]">
+          Keep this ID in case you do not receive your novel manuscript within
+          one day of ordering.
+        </p>
+      </div>
+
+      <div className="mt-5 grid gap-5 sm:grid-cols-2">
         <div>
           <label
             htmlFor="name"
@@ -223,8 +315,8 @@ export function NewStoryForm() {
             className="mt-1 shrink-0 text-[#007a4d]"
           />
           <span>
-            Your order is saved before checkout. Work on your novel manuscript begins
-            after payment confirmation.
+            Your story details and Book ID stay with your order. Work on your
+            novel manuscript begins after payment is confirmed.
           </span>
         </div>
         <button
@@ -237,7 +329,7 @@ export function NewStoryForm() {
           <ArrowRight aria-hidden="true" size={18} />
         </button>
       </div>
-      <p className="mt-5 text-sm leading-6 text-[#52615a]">
+      <p role="status" aria-live="polite" className="mt-5 text-sm leading-6 text-[#52615a]">
         {validationMessage ?? message}
       </p>
     </form>

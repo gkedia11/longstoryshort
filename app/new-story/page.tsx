@@ -1,5 +1,16 @@
+import type { Metadata } from "next";
 import { AppNav } from "@/components/AppNav";
 import { NewStoryForm } from "@/components/NewStoryForm";
+
+export const metadata: Metadata = {
+  title: "Start a Novel Manuscript Order",
+  description:
+    "Start a Longstory Short Story order for a complete novel manuscript.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function NewStoryPage() {
   return (
@@ -12,7 +23,7 @@ export default function NewStoryPage() {
           </h1>
           <p className="mt-3 text-lg leading-8 text-[#52615a]">
             Give us enough direction to write with intent. Specific characters,
-            setting, stakes, and tone usually produce stronger drafts.
+            setting, stakes, and tone usually produce a stronger novel manuscript.
           </p>
         </div>
         <NewStoryForm />

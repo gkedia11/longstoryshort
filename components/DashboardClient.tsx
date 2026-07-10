@@ -4,10 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CreditCard, RefreshCw } from "lucide-react";
-import {
-  getSupabaseBrowserClient,
-  getSupabaseBrowserConfigError,
-} from "@/lib/supabase/client";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type StoryOrder = {
   id: string;
@@ -29,15 +26,22 @@ const badgeClass: Record<string, string> = {
   failed: "bg-rose-100 text-rose-800",
 };
 
+const statusLabel: Record<string, string> = {
+  draft: "draft",
+  pending_payment: "pending payment",
+  paid: "paid",
+  sent_to_n8n: "being written",
+  failed: "needs attention",
+};
+
 export function DashboardClient() {
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
-  const configError = getSupabaseBrowserConfigError();
   const [orders, setOrders] = useState<StoryOrder[]>([]);
   const [message, setMessage] = useState(
     supabase
       ? "Loading your novel manuscript orders..."
-      : (configError ?? "Supabase browser keys are not configured yet."),
+      : "Your dashboard is temporarily unavailable. Please try again later.",
   );
   const [isLoading, setIsLoading] = useState(Boolean(supabase));
   const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
@@ -63,7 +67,8 @@ export function DashboardClient() {
 
     setIsLoading(false);
     if (error) {
-      setMessage(error.message);
+      console.error("Dashboard order load failed", error);
+      setMessage("We could not load your orders. Please refresh or try again later.");
       return;
     }
 
@@ -98,7 +103,8 @@ export function DashboardClient() {
       if (!isActive) return;
       setIsLoading(false);
       if (error) {
-        setMessage(error.message);
+        console.error("Dashboard order load failed", error);
+        setMessage("We could not load your orders. Please refresh or try again later.");
         return;
       }
 
@@ -143,7 +149,7 @@ export function DashboardClient() {
 
     if (!response.ok || !payload.checkout_url) {
       setPayingOrderId(null);
-      setMessage(payload.error ?? "Could not open checkout.");
+      setMessage("We could not open secure payment. Please try again in a moment.");
       return;
     }
 
@@ -157,7 +163,7 @@ export function DashboardClient() {
           <h1 className="text-4xl font-semibold text-[#101513]">
             Novel manuscript dashboard
           </h1>
-          <p className="mt-3 max-w-2xl leading-7 text-[#52615a]">{message}</p>
+          <p role="status" aria-live="polite" className="mt-3 max-w-2xl leading-7 text-[#52615a]">{message}</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <button
@@ -196,14 +202,17 @@ export function DashboardClient() {
               <tbody className="divide-y divide-[#dbe5df]">
                 {orders.map((order) => {
                   const canPay =
-                    order.story_status === "pending_payment" ||
-                    order.stripe_payment_status === "unpaid";
+                    order.story_status === "pending_payment" &&
+                    order.stripe_payment_status !== "paid";
 
                   return (
                     <tr key={order.id} className="align-top">
                       <td className="max-w-md px-5 py-4">
                         <p className="font-semibold text-[#101513]">
                           {order.name}
+                        </p>
+                        <p className="mt-1 font-mono text-xs text-[#6f7d76]">
+                          Book ID {order.id}
                         </p>
                         <p className="mt-1 line-clamp-2 text-[#52615a]">
                           {order.summary}
@@ -213,7 +222,9 @@ export function DashboardClient() {
                         {order.genre}
                       </td>
                       <td className="px-5 py-4 text-[#34423c]">
-                        {order.stripe_payment_status ?? "unpaid"}
+                        {order.stripe_payment_status === "paid"
+                          ? "Paid"
+                          : "Payment needed"}
                       </td>
                       <td className="px-5 py-4">
                         <span
@@ -223,7 +234,8 @@ export function DashboardClient() {
                               "bg-slate-100 text-slate-700",
                           ].join(" ")}
                         >
-                          {order.story_status.replaceAll("_", " ")}
+                          {statusLabel[order.story_status] ??
+                            order.story_status.replaceAll("_", " ")}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-[#52615a]">
@@ -241,7 +253,7 @@ export function DashboardClient() {
                             {payingOrderId === order.id ? "Opening..." : "Pay now"}
                           </button>
                         ) : (
-                          <span className="text-sm text-[#6f7d76]">Done</span>
+                          <span className="text-sm text-[#6f7d76]">No action needed</span>
                         )}
                       </td>
                     </tr>
@@ -257,8 +269,8 @@ export function DashboardClient() {
             Start your first novel manuscript.
           </h2>
           <p className="mt-3 max-w-2xl leading-7 text-[#52615a]">
-            Submit a premise, save the order, and continue to the secured
-            checkout flow.
+            Describe your story, receive a Book ID, and continue to secure
+            payment.
           </p>
           <Link
             href="/new-story"

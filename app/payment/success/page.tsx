@@ -1,8 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, LayoutDashboard } from "lucide-react";
 import { AppNav } from "@/components/AppNav";
 import { PaymentSuccessStatus } from "@/components/PaymentSuccessStatus";
 import { site } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Payment Received",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function PaymentSuccessPage({
   searchParams,
@@ -36,7 +45,7 @@ export default async function PaymentSuccessPage({
         </p>
         {params.order_id ? (
           <p className="mt-5 font-mono text-sm text-[#6f7d76]">
-            Order {params.order_id}
+            Book ID {params.order_id}
           </p>
         ) : null}
         <PaymentSuccessStatus orderId={params.order_id} />

@@ -1,0 +1,18 @@
+# Cache content-hashed application assets immutably.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache stable public media while allowing quick future brand updates.
+/*.png
+  Cache-Control: public, max-age=86400
+
+/*.jpeg
+  Cache-Control: public, max-age=86400
+
+/*.svg
+  Cache-Control: public, max-age=86400
+
+# Small hardening headers for static responses.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

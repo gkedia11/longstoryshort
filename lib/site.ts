@@ -1,7 +1,12 @@
+const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+
 export const site = {
   name: "Longstory Short Story",
-  domain: "longstoryshortstory.com",
-  supportEmail: "support@longstoryshortstory.com",
+  legalName: "Long Story Short LLC",
+  domain: "longstoryshortllc.com",
+  finalUrl: "https://longstoryshortllc.com",
+  url: configuredUrl || "https://longstoryshort.giltunnel.org",
+  supportEmail: "support@longstoryshortllc.com",
   price: "$29.99",
   priceCents: 2999,
   currency: "usd",
@@ -11,9 +16,10 @@ export const site = {
 };
 
 export const navItems = [
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/#examples", label: "Examples" },
+  { href: "/how-it-works", label: "How it works" },
+  { href: "/samples", label: "Samples" },
   { href: "/#pricing", label: "Pricing" },
+  { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
 

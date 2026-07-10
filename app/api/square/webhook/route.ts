@@ -56,11 +56,10 @@ export async function POST(request: Request) {
       story_status: "paid",
     });
 
-    const n8nResult = await sendStoryOrderToN8n(order.id, paymentId);
-    return Response.json({ received: true, n8n: n8nResult });
+    await sendStoryOrderToN8n(order.id, paymentId);
+    return Response.json({ received: true });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Webhook could not be processed.";
-    return Response.json({ error: message }, { status: 400 });
+    console.error("Payment notification failed", error);
+    return Response.json({ error: "Payment notification could not be processed." }, { status: 400 });
   }
 }

@@ -1,6 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AuthPanel } from "@/components/AuthPanel";
 import { Logo } from "@/components/Logo";
+
+export const metadata: Metadata = {
+  title: "Log In or Create Account",
+  description:
+    "Sign in to manage your Longstory Short Story novel manuscript orders.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function LoginPage() {
   return (
@@ -16,12 +27,12 @@ export default function LoginPage() {
       </div>
       <section className="mx-auto grid max-w-6xl gap-10 py-16 lg:grid-cols-[1fr_0.86fr] lg:items-center">
         <div>
-          <h1 className="text-5xl font-semibold leading-[1.05] sm:text-6xl">
-            Sign in to manage your novel manuscripts.
+          <h1 className="text-4xl font-semibold leading-[1.05] sm:text-6xl">
+            Log in or create an account.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-[#52615a]">
-            Use your email and password to access submitted orders, checkout
-            state, payment status, and novel manuscript progress.
+            View your Book IDs, continue orders that still need payment, and
+            follow each novel manuscript from order to delivery.
           </p>
         </div>
         <AuthPanel />

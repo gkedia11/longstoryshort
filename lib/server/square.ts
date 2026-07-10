@@ -77,7 +77,7 @@ export async function createSquarePaymentLink(input: {
     pre_populated_data: {
       buyer_email: input.customerEmail,
     },
-    description: `Longstory Short Story manuscript order ${input.orderId}`,
+    description: `Longstory Short Story novel manuscript order ${input.orderId}`,
     payment_note: `story_order_id=${input.orderId}; application_id=${applicationId}`,
   };
 

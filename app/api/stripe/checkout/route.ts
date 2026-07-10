@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     if (order.story_status === "sent_to_n8n") {
       return Response.json(
-        { error: "This order has already been sent to the manuscript workflow." },
+        { error: "Work has already begun on this order." },
         { status: 409 },
       );
     }
@@ -66,8 +66,10 @@ export async function POST(request: Request) {
 
     return Response.json({ checkout_url: checkout.url });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Checkout could not be created.";
-    return Response.json({ error: message }, { status: 500 });
+    console.error("Checkout creation failed", error);
+    return Response.json(
+      { error: "Secure payment could not be opened. Please try again." },
+      { status: 500 },
+    );
   }
 }

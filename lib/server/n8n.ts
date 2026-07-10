@@ -13,6 +13,7 @@ export async function sendStoryOrderToN8n(orderId: string, paymentId: string) {
 
   const payload = {
     order_id: order.id,
+    book_id: order.id,
     square_payment_id: paymentId,
     user_id: order.user_id,
     name: order.name,

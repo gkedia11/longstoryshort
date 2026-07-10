@@ -40,4 +40,6 @@ next-env.d.ts
 /.vinext/
 /.wrangler/
 devserver.log
+dev-homepage-preview.log
+.playwright-cli/
 output/
