@@ -95,7 +95,7 @@ Listen for payment events such as `payment.created` and `payment.updated`. The a
 The default workflow endpoint is:
 
 ```text
-https://n8n.srv822882.hstgr.cloud/webhook/de6ee764-0eb3-41b0-9172-16ea4f8e31c7
+https://longstoryshortabc.app.n8n.cloud/webhook/de6ee764-0eb3-41b0-9172-16ea4f8e31c7
 ```
 
 The browser never calls n8n directly. The server webhook route sends the payload only after Square confirms payment.
