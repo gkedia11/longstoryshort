@@ -9,22 +9,22 @@ export function Logo({ compact = false }: LogoProps) {
   return (
     <Link
       href="/"
-      className="logo-link flex items-center gap-2.5 rounded-md bg-[#07110d]/20 px-1.5 py-1 backdrop-blur-[1px] transition duration-200 hover:-translate-y-0.5 hover:scale-[1.025] sm:gap-3 sm:px-2"
+      className="logo-link flex items-center gap-2.5 rounded-md bg-[#07110d]/38 px-1.5 py-1 backdrop-blur-[2px] transition duration-200 hover:-translate-y-0.5 hover:scale-[1.025] sm:gap-3 sm:px-2"
       aria-label="Longstory Short Story home"
     >
       <span
         className={[
-          "relative block shrink-0 overflow-hidden",
+          "relative block shrink-0 overflow-hidden rounded-full bg-white ring-1 ring-white/80 shadow-[0_4px_14px_rgba(0,0,0,0.36)]",
           compact ? "h-9 w-9" : "h-9 w-9 sm:h-12 sm:w-12",
         ].join(" ")}
       >
         <Image
-          src="/brand-logo-mark-small.png"
+          src="/brand-logo-circular.png"
           alt="Longstory Short Story"
           fill
           unoptimized
           sizes={compact ? "36px" : "(min-width: 640px) 48px, 36px"}
-          className="brand-logo-mark h-full w-full object-contain transition duration-200"
+          className="brand-logo-mark h-full w-full scale-[1.08] object-contain transition duration-200"
         />
       </span>
       <span

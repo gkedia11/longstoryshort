@@ -40,11 +40,11 @@ body {
 }
 
 .brand-logo-mark {
-  filter: drop-shadow(0 5px 14px rgba(0, 0, 0, 0.42));
+  filter: contrast(1.14) saturate(1.08) drop-shadow(0 4px 12px rgba(55, 12, 15, 0.32));
 }
 
 .logo-link:hover .brand-logo-mark {
-  filter: drop-shadow(0 7px 18px rgba(0, 0, 0, 0.5));
+  filter: contrast(1.2) saturate(1.15) drop-shadow(0 7px 18px rgba(55, 12, 15, 0.42));
 }
 
 .field {
