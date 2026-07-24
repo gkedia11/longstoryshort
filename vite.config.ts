@@ -10,6 +10,11 @@ const localBindingConfig = {
 };
 
 export default defineConfig({
+  ssr: {
+    // Firebase Admin relies on Node package metadata at runtime. Keep it external
+    // to Vinext's server bundle so it starts correctly on Hostinger.
+    external: ["firebase-admin"],
+  },
   plugins: [
     vinext(),
     cloudflare({
