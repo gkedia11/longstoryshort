@@ -4,7 +4,7 @@ import {
   getStoryOrderForUser,
   getUserFromAuthorization,
   updateStoryOrder,
-} from "@/lib/server/supabase";
+} from "@/lib/server/firebase";
 
 export async function POST(request: Request) {
   try {

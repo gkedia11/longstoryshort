@@ -4,7 +4,7 @@ import {
   getStoryOrder,
   getStoryOrderByCheckoutId,
   updateStoryOrder,
-} from "@/lib/server/supabase";
+} from "@/lib/server/firebase";
 
 function getStoryOrderIdFromNote(note?: string) {
   return note?.match(/story_order_id=([^;\s]+)/)?.[1] ?? null;

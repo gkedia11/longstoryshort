@@ -1,6 +1,6 @@
 import { site } from "@/lib/site";
 import { verifyStripeWebhook } from "@/lib/server/stripe";
-import { getStoryOrder, updateStoryOrder } from "@/lib/server/supabase";
+import { getStoryOrder, updateStoryOrder } from "@/lib/server/firebase";
 
 async function sendToN8n(orderId: string, stripeSessionId: string) {
   const order = await getStoryOrder(orderId);

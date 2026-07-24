@@ -5,7 +5,7 @@ import {
   getStoryOrderForUser,
   getUserFromAuthorization,
   updateStoryOrder,
-} from "@/lib/server/supabase";
+} from "@/lib/server/firebase";
 
 export async function POST(request: Request) {
   const rateLimit = checkRateLimit(`checkout:${getClientKey(request)}`, 8);

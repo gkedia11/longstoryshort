@@ -1,5 +1,5 @@
 import { site } from "@/lib/site";
-import { getStoryOrder, updateStoryOrder } from "@/lib/server/supabase";
+import { getStoryOrder, updateStoryOrder } from "@/lib/server/firebase";
 
 export async function sendStoryOrderToN8n(orderId: string, paymentId: string) {
   const order = await getStoryOrder(orderId);
