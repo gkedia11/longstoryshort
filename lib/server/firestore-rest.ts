@@ -23,7 +23,8 @@ function serviceAccount() {
   const jsonValue = normalizedValue.startsWith("{")
     ? normalizedValue
     : Buffer.from(normalizedValue, "base64").toString("utf8");
-  return JSON.parse(jsonValue) as ServiceAccount;
+  const sanitizedJsonValue = jsonValue.replace(/\\(?!["\\/bfnrtu])/g, "");
+  return JSON.parse(sanitizedJsonValue) as ServiceAccount;
 }
 
 function base64Url(value: string | Buffer) {
