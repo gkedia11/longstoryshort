@@ -38,9 +38,10 @@ export type StoryOrder = {
   email: string;
   genre: string;
   summary: string;
+  book_title: string | null;
   stripe_checkout_session_id: string | null;
   stripe_payment_status: string | null;
-  story_status: "draft" | "pending_payment" | "paid" | "sent_to_n8n" | "writing" | "proofreading" | "completed" | "delivered" | "failed";
+  story_status: "draft" | "pending_payment" | "paid" | "sent_to_n8n" | "title_ready" | "outline_completed" | "writing" | "writing_completed" | "proofreading" | "completed" | "email_sent" | "delivered" | "failed";
   n8n_response: unknown | null;
   created_at: string;
   updated_at: string;
@@ -85,6 +86,7 @@ export async function getStoryOrderForUser(orderId: string, userId: string) {
 
 export async function getStoryOrder(orderId: string) {
   const snapshot = await database().collection("story_orders").doc(orderId).get();
+  if (!snapshot.exists) return null;
   return normalizeOrder(snapshot.id, snapshot.data());
 }
 

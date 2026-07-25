@@ -1,10 +1,14 @@
 import { timingSafeEqual } from "node:crypto";
-import { getStoryOrder, updateStoryOrder } from "@/lib/server/firebase";
+import { getStoryOrder, updateStoryOrder, type StoryOrder } from "@/lib/server/firebase";
 
 const allowedStatuses = new Set([
+  "title_ready",
+  "outline_completed",
   "writing",
+  "writing_completed",
   "proofreading",
   "completed",
+  "email_sent",
   "delivered",
   "failed",
 ]);
@@ -28,24 +32,38 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json() as { book_id?: unknown; status?: unknown };
+    const body = await request.json() as {
+      book_id?: unknown;
+      status?: unknown;
+      book_title?: unknown;
+    };
     const bookId = typeof body.book_id === "string" ? body.book_id.trim() : "";
     const status = typeof body.status === "string" ? body.status.trim().toLowerCase() : "";
+    const bookTitle = typeof body.book_title === "string" ? body.book_title.trim() : "";
 
     if (!bookId || !allowedStatuses.has(status)) {
       return Response.json({ error: "Invalid Book ID or status." }, { status: 400 });
     }
 
+    if (status === "title_ready" && (!bookTitle || bookTitle.length > 200)) {
+      return Response.json({ error: "A valid book title is required." }, { status: 400 });
+    }
     const order = await getStoryOrder(bookId);
     if (!order) {
       return Response.json({ error: "Book not found." }, { status: 404 });
     }
 
     await updateStoryOrder(bookId, {
-      story_status: status as typeof order.story_status,
+      story_status: status as StoryOrder["story_status"],
+      ...(bookTitle ? { book_title: bookTitle } : {}),
     });
 
-    return Response.json({ updated: true, book_id: bookId, status });
+    return Response.json({
+      updated: true,
+      book_id: bookId,
+      status,
+      ...(bookTitle ? { book_title: bookTitle } : {}),
+    });
   } catch {
     return Response.json({ error: "Status update could not be processed." }, { status: 400 });
   }
