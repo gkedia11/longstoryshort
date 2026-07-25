@@ -19,7 +19,8 @@ function serviceAccount() {
   if (!value || value.includes("REPLACE_WITH")) {
     throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured");
   }
-  return JSON.parse(value) as ServiceAccount;
+  const normalizedValue = value.startsWith("\\{") ? value.slice(1) : value;
+  return JSON.parse(normalizedValue) as ServiceAccount;
 }
 
 function base64Url(value: string | Buffer) {
