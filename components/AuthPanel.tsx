@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { KeyRound, LogIn, Mail, UserPlus } from "lucide-react";
 import {
@@ -9,18 +9,27 @@ import {
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
-  signInWithRedirect,
+  signInWithPopup,
   updateProfile,
   verifyPasswordResetCode,
+  type User,
 } from "firebase/auth";
-import { getFirebaseAuth, getFirebaseBrowserConfigError, googleProvider } from "@/lib/firebase/client";
+import { doc, setDoc } from "firebase/firestore";
+import {
+  getFirebaseAuth,
+  getFirebaseBrowserConfigError,
+  getFirebaseDb,
+  googleProvider,
+} from "@/lib/firebase/client";
 
 type AuthMode = "signIn" | "signUp" | "resetRequest" | "updatePassword";
 
 export function AuthPanel() {
   const router = useRouter();
   const auth = getFirebaseAuth();
+  const db = getFirebaseDb();
   const unavailable = getFirebaseBrowserConfigError();
+  const googleInProgress = useRef(false);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
@@ -36,13 +45,55 @@ export function AuthPanel() {
     if (reset && code) {
       void verifyPasswordResetCode(auth, code).then((address) => { setEmail(address); setMode("updatePassword"); setMessage("Choose a new password for your account."); }).catch(() => setMessage("That password reset link is no longer valid. Request a new one."));
     }
-    const unsubscribe = onAuthStateChanged(auth, (user) => { if (user && !reset) router.replace("/dashboard"); });
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && !reset && !googleInProgress.current) router.replace("/dashboard");
+    });
     return unsubscribe;
   }, [auth, router]);
 
+  async function saveGoogleProfile(user: User) {
+    if (!db) return;
+    const updatedAt = new Date().toISOString();
+    await setDoc(doc(db, "profiles", user.uid), {
+      id: user.uid,
+      email: user.email ?? "",
+      full_name: user.displayName ?? user.email?.split("@")[0] ?? "",
+      updated_at: updatedAt,
+    }, { merge: true });
+  }
+
   async function submitSignIn(event: FormEvent<HTMLFormElement>) { event.preventDefault(); if (!auth) return; setIsSubmitting(true); try { await signInWithEmailAndPassword(auth, email, password); router.replace("/dashboard"); } catch { setMessage("Login did not work. Check your email and password, or reset your password if you forgot it."); setIsSubmitting(false); } }
   async function submitSignUp(event: FormEvent<HTMLFormElement>) { event.preventDefault(); if (!auth) return; if (password !== confirmPassword) return setMessage("The passwords do not match."); setIsSubmitting(true); try { const result = await createUserWithEmailAndPassword(auth, email, password); await updateProfile(result.user, { displayName: fullName.trim() }); router.replace("/dashboard"); } catch { setMessage("We could not create the account. Check your details or try signing in if you already have an account."); setIsSubmitting(false); } }
-  async function google() { if (!auth) return; setIsSubmitting(true); setMessage("Opening Google sign-in..."); try { await signInWithRedirect(auth, googleProvider); } catch { setMessage("Google sign-in could not be started. Please try again."); setIsSubmitting(false); } }
+  async function google() {
+    if (!auth) return;
+    googleInProgress.current = true;
+    setIsSubmitting(true);
+    setMessage("Opening Google sign-in...");
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      try {
+        await saveGoogleProfile(result.user);
+      } catch {
+        // Authentication succeeded; profile details can be refreshed from Google later.
+      }
+      router.replace("/dashboard");
+    } catch (error) {
+      googleInProgress.current = false;
+      const code = typeof error === "object" && error && "code" in error
+        ? String(error.code)
+        : "";
+      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+        setMessage("Google sign-in was closed before it finished.");
+      } else if (code === "auth/popup-blocked") {
+        setMessage("Your browser blocked the Google sign-in window. Allow pop-ups for this site and try again.");
+      } else if (code === "auth/account-exists-with-different-credential") {
+        setMessage("An account already uses this email. Log in with your email and password, then try Google again.");
+      } else {
+        setMessage("Google sign-in did not work. Please try again.");
+      }
+      setIsSubmitting(false);
+    }
+  }
   async function reset(event: FormEvent<HTMLFormElement>) { event.preventDefault(); if (!auth) return; setIsSubmitting(true); try { await sendPasswordResetEmail(auth, email, { url: `${window.location.origin}/login` }); setMessage("Password reset email sent. Open it to choose a new password."); } catch { setMessage("We could not send the reset email. Check the address and try again."); } setIsSubmitting(false); }
   async function changePassword(event: FormEvent<HTMLFormElement>) { event.preventDefault(); if (!auth) return; if (password !== confirmPassword) return setMessage("The new passwords do not match."); const code = new URLSearchParams(window.location.search).get("oobCode"); if (!code) return setMessage("That password reset link is no longer valid. Request a new one."); setIsSubmitting(true); try { await confirmPasswordReset(auth, code, password); setMessage("Password changed. Please log in."); setMode("signIn"); } catch { setMessage("We could not change your password. Please try the reset link again."); } setIsSubmitting(false); }
   const disabled = !auth || isSubmitting;
