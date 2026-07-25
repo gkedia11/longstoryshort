@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { getStoryOrder, updateStoryOrder, type StoryOrder } from "@/lib/server/firebase";
+import { storyOrderExists, updateStoryOrderProgress } from "@/lib/server/firestore-rest";
 
 const allowedStatuses = new Set([
   "title_ready",
@@ -48,15 +48,12 @@ export async function POST(request: Request) {
     if (status === "title_ready" && (!bookTitle || bookTitle.length > 200)) {
       return Response.json({ error: "A valid book title is required." }, { status: 400 });
     }
-    const order = await getStoryOrder(bookId);
-    if (!order) {
+
+    if (!await storyOrderExists(bookId)) {
       return Response.json({ error: "Book not found." }, { status: 404 });
     }
 
-    await updateStoryOrder(bookId, {
-      story_status: status as StoryOrder["story_status"],
-      ...(bookTitle ? { book_title: bookTitle } : {}),
-    });
+    await updateStoryOrderProgress(bookId, status, bookTitle || undefined);
 
     return Response.json({
       updated: true,
