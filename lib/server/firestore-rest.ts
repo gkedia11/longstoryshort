@@ -24,7 +24,9 @@ function serviceAccount() {
     ? normalizedValue
     : Buffer.from(normalizedValue, "base64").toString("utf8");
   const sanitizedJsonValue = jsonValue.replace(/\\(?!["\\/bfnrtu])/g, "");
-  return JSON.parse(sanitizedJsonValue) as ServiceAccount;
+  const account = JSON.parse(sanitizedJsonValue) as ServiceAccount;
+  account.private_key = account.private_key.replace(/\\n/g, "\n");
+  return account;
 }
 
 function base64Url(value: string | Buffer) {
