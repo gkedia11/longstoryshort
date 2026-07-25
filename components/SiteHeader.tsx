@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { navItems } from "@/lib/site";
+import { AuthMenu } from "./AuthMenu";
 import { Logo } from "./Logo";
 
 export function SiteHeader() {
@@ -25,12 +26,8 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="hidden items-center gap-2 lg:flex">
-          <Link
-            href="/login"
-            className="inline-flex rounded-full px-2.5 py-2 text-[11px] font-semibold leading-none text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition hover:text-white/82 sm:px-4 sm:py-2 sm:text-base sm:leading-normal"
-          >
-            Log in / Sign up
-          </Link>
+          <AuthMenu />
+
           <Link
             href="/new-story"
             className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#07110d] shadow-sm transition hover:bg-[#d9f4e9] sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
@@ -71,13 +68,8 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            <Link
-              href="/login"
-              onClick={() => setMenuOpen(false)}
-              className="mt-1 flex min-h-11 items-center rounded-md border-t border-white/12 px-3 pt-2 text-base font-semibold hover:bg-white/10"
-            >
-              Log in / Sign up
-            </Link>
+            <AuthMenu mobile />
+
           </div>
         </nav>
       ) : null}
