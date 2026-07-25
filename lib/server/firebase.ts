@@ -40,7 +40,7 @@ export type StoryOrder = {
   summary: string;
   stripe_checkout_session_id: string | null;
   stripe_payment_status: string | null;
-  story_status: "draft" | "pending_payment" | "paid" | "sent_to_n8n" | "failed";
+  story_status: "draft" | "pending_payment" | "paid" | "sent_to_n8n" | "writing" | "proofreading" | "completed" | "delivered" | "failed";
   n8n_response: unknown | null;
   created_at: string;
   updated_at: string;
