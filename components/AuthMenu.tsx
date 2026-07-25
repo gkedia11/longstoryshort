@@ -62,7 +62,7 @@ export function AuthMenu({ mobile = false }: AuthMenuProps) {
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={mobile ? "mobile-auth-menu" : "desktop-auth-menu"}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => mobile ? setOpen((current) => !current) : setOpen(true)}
         className={mobile
           ? "mt-1 flex min-h-11 w-full items-center gap-2 rounded-md border-t border-white/12 px-3 pt-2 text-left text-base font-semibold text-white hover:bg-white/10"
           : "inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-base font-semibold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition hover:bg-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"}
