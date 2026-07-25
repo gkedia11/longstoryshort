@@ -1,6 +1,35 @@
-import * as adminApp from "firebase-admin/app";
-import * as adminAuth from "firebase-admin/auth";
-import * as adminFirestore from "firebase-admin/firestore";
+import { createRequire } from "node:module";
+
+const runtimeRequire = createRequire(import.meta.url);
+
+type FirebaseAdminModules = {
+  app: {
+    cert: (serviceAccount: object) => unknown;
+    getApps: () => unknown[];
+    initializeApp: (options: { credential: unknown }) => unknown;
+  };
+  auth: {
+    getAuth: (app: unknown) => {
+      verifyIdToken: (token: string) => Promise<{ uid: string; email?: string }>;
+    };
+  };
+  firestore: {
+    FieldValue: { serverTimestamp: () => unknown };
+    getFirestore: (app: unknown) => {
+      collection: (name: string) => any;
+    };
+  };
+};
+
+function firebaseAdmin(): FirebaseAdminModules {
+  // Vinext bundles static Firebase Admin imports incorrectly for Hostinger.
+  // Node resolves these production dependencies directly at server runtime.
+  return {
+    app: runtimeRequire("firebase-admin/app"),
+    auth: runtimeRequire("firebase-admin/auth"),
+    firestore: runtimeRequire("firebase-admin/firestore"),
+  };
+}
 
 export type StoryOrder = {
   id: string;
@@ -27,19 +56,20 @@ function required(name: string) {
 }
 
 function getAdminApp() {
-  if (adminApp.getApps().length) return adminApp.getApps()[0]!;
+  const { app } = firebaseAdmin();
+  if (app.getApps().length) return app.getApps()[0]!;
   const serviceAccount = JSON.parse(required("FIREBASE_SERVICE_ACCOUNT_JSON"));
-  return adminApp.initializeApp({ credential: adminApp.cert(serviceAccount) });
+  return app.initializeApp({ credential: app.cert(serviceAccount) });
 }
 
 function database() {
-  return adminFirestore.getFirestore(getAdminApp());
+  return firebaseAdmin().firestore.getFirestore(getAdminApp());
 }
 
 export async function getUserFromAuthorization(authorization: string | null): Promise<FirebaseUser> {
   if (!authorization?.startsWith("Bearer ")) throw new Error("Missing Firebase access token");
   const token = authorization.replace(/^Bearer\s+/i, "");
-  const decoded = await adminAuth.getAuth(getAdminApp()).verifyIdToken(token);
+  const decoded = await firebaseAdmin().auth.getAuth(getAdminApp()).verifyIdToken(token);
   return { id: decoded.uid, email: decoded.email };
 }
 
@@ -69,7 +99,7 @@ export async function getStoryOrderByCheckoutId(checkoutId: string) {
 
 export async function updateStoryOrder(orderId: string, payload: Partial<StoryOrder>) {
   const ref = database().collection("story_orders").doc(orderId);
-  await ref.set({ ...payload, updated_at: new Date().toISOString(), updated_at_server: adminFirestore.FieldValue.serverTimestamp() }, { merge: true });
+  await ref.set({ ...payload, updated_at: new Date().toISOString(), updated_at_server: firebaseAdmin().firestore.FieldValue.serverTimestamp() }, { merge: true });
   const snapshot = await ref.get();
   return normalizeOrder(snapshot.id, snapshot.data());
 }
