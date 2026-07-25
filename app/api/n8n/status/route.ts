@@ -64,7 +64,8 @@ export async function POST(request: Request) {
       status,
       ...(bookTitle ? { book_title: bookTitle } : {}),
     });
-  } catch {
+  } catch (error) {
+    console.error("N8N status update failed", error);
     return Response.json({ error: "Status update could not be processed." }, { status: 400 });
   }
 }
