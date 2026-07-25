@@ -76,7 +76,7 @@ export function AuthMenu({ mobile = false }: AuthMenuProps) {
           <button
             type="button"
             aria-label="Close account panel"
-            className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[2px]"
+            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[1px]"
             onClick={() => setOpen(false)}
           />
           <section
@@ -84,12 +84,12 @@ export function AuthMenu({ mobile = false }: AuthMenuProps) {
             role="dialog"
             aria-modal="true"
             aria-label="Log in or create an account"
-            className="fixed inset-x-3 top-4 z-50 max-h-[calc(100svh-2rem)] overflow-y-auto rounded-lg border border-white/20 bg-white p-5 text-[#101513] shadow-2xl"
+            className="fixed inset-x-4 top-3 z-50 max-h-[calc(100svh-1.5rem)] overflow-y-auto rounded-lg border border-white/25 bg-[#f3f6f2]/96 p-4 text-[#101513] shadow-2xl backdrop-blur-xl"
           >
-            <div className="mb-4 flex items-start justify-between gap-4 border-b border-[#dbe5df] pb-4">
+            <div className="mb-3 flex items-start justify-between gap-3 border-b border-[#dbe5df] pb-3">
               <div>
                 <p className="text-lg font-semibold">Your account</p>
-                <p className="mt-1 text-sm leading-5 text-[#52615a]">Log in or create an account without leaving this page.</p>
+                <p className="mt-1 text-xs leading-5 text-[#52615a]">Log in or create an account without leaving this page.</p>
               </div>
               <button
                 type="button"
@@ -106,18 +106,26 @@ export function AuthMenu({ mobile = false }: AuthMenuProps) {
       ) : null}
 
       {open && !mobile ? (
-        <section
-          id="desktop-auth-menu"
-          role="dialog"
-          aria-label="Log in or create an account"
-          className="absolute right-0 top-[calc(100%+0.6rem)] z-50 max-h-[calc(100svh-6.5rem)] w-[24rem] overflow-y-auto rounded-lg border border-white/25 bg-white p-5 text-[#101513] shadow-[0_24px_70px_rgba(0,0,0,0.34)]"
-        >
-          <div className="mb-4 border-b border-[#dbe5df] pb-4">
-            <p className="text-lg font-semibold">Your account</p>
-            <p className="mt-1 text-sm leading-5 text-[#52615a]">Log in or create an account without leaving this page.</p>
-          </div>
-          <AuthPanel compact />
-        </section>
+        <>
+          <button
+            type="button"
+            aria-label="Close account panel"
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px]"
+            onClick={() => setOpen(false)}
+          />
+          <section
+            id="desktop-auth-menu"
+            role="dialog"
+            aria-label="Log in or create an account"
+            className="absolute right-0 top-[calc(100%+0.6rem)] z-50 max-h-[calc(100svh-6.5rem)] w-[21.5rem] overflow-y-auto rounded-lg border border-white/25 bg-[#f3f6f2]/96 p-4 text-[#101513] shadow-[0_24px_70px_rgba(0,0,0,0.34)] backdrop-blur-xl"
+          >
+            <div className="mb-3 border-b border-[#dbe5df] pb-3">
+              <p className="font-semibold">Your account</p>
+              <p className="mt-1 text-xs leading-5 text-[#52615a]">Log in or create an account without leaving this page.</p>
+            </div>
+            <AuthPanel compact />
+          </section>
+        </>
       ) : null}
     </div>
   );

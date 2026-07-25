@@ -155,7 +155,7 @@ export default function Home() {
               </h1>
               <p className="mx-auto mt-4 max-w-[21rem] text-base leading-7 text-white/90 drop-shadow-[0_3px_10px_rgba(0,0,0,0.62)] sm:mt-5 sm:max-w-3xl sm:text-xl sm:leading-9">
                 Share your genre and story idea. Receive a complete fiction
-                novel manuscript by email for {site.price}, with no subscription.
+                novel manuscript by email. No subscriptions, just book launches.
               </p>
               <Link
                 href="/new-story"
