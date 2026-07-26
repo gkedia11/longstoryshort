@@ -279,7 +279,9 @@ export function SquareCardPayment({
           <CheckCircle2 className="mt-0.5 shrink-0 text-emerald-700" size={24} />
           <div>
             <h3 className="font-semibold text-emerald-950">Payment successful</h3>
-            <p className="mt-1 text-sm leading-6 text-emerald-900">Your story has been submitted. A payment confirmation has been sent for email delivery.</p>
+            <p className="mt-1 text-sm leading-6 text-emerald-900">
+              Your story has been submitted. Check your email address ({customerEmail}) for the receipt.
+            </p>
             {success.card_last_four ? <p className="mt-1 text-xs text-emerald-800">Card ending in {success.card_last_four}</p> : null}
           </div>
         </div>
