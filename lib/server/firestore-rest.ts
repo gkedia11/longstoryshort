@@ -12,6 +12,20 @@ type TokenResponse = {
   expires_in?: number;
 };
 
+type FirestoreValue =
+  | { nullValue: null }
+  | { stringValue: string }
+  | { booleanValue: boolean }
+  | { integerValue: string }
+  | { doubleValue: number }
+  | { arrayValue: { values?: FirestoreValue[] } }
+  | { mapValue: { fields?: Record<string, FirestoreValue> } };
+
+type FirestoreDocument = {
+  name: string;
+  fields?: Record<string, FirestoreValue>;
+};
+
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
 function serviceAccount() {
@@ -73,30 +87,140 @@ async function accessToken() {
   return cachedToken.value;
 }
 
-function documentUrl(bookId: string) {
+function documentsUrl() {
   const { project_id: projectId } = serviceAccount();
-  return `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(projectId)}/databases/(default)/documents/story_orders/${encodeURIComponent(bookId)}`;
+  return `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(projectId)}/databases/(default)/documents`;
 }
 
-export async function storyOrderExists(bookId: string) {
+function documentUrl(bookId: string) {
+  return `${documentsUrl()}/story_orders/${encodeURIComponent(bookId)}`;
+}
+
+function encodeValue(value: unknown): FirestoreValue {
+  if (value === null || value === undefined) return { nullValue: null };
+  if (typeof value === "string") return { stringValue: value };
+  if (typeof value === "boolean") return { booleanValue: value };
+  if (typeof value === "number") {
+    return Number.isInteger(value)
+      ? { integerValue: String(value) }
+      : { doubleValue: value };
+  }
+  if (Array.isArray(value)) {
+    return { arrayValue: { values: value.map(encodeValue) } };
+  }
+  if (typeof value === "object") {
+    return {
+      mapValue: {
+        fields: Object.fromEntries(
+          Object.entries(value).map(([key, item]) => [key, encodeValue(item)]),
+        ),
+      },
+    };
+  }
+  return { stringValue: String(value) };
+}
+
+function decodeValue(value: FirestoreValue): unknown {
+  if ("nullValue" in value) return null;
+  if ("stringValue" in value) return value.stringValue;
+  if ("booleanValue" in value) return value.booleanValue;
+  if ("integerValue" in value) return Number(value.integerValue);
+  if ("doubleValue" in value) return value.doubleValue;
+  if ("arrayValue" in value) return (value.arrayValue.values ?? []).map(decodeValue);
+  if ("mapValue" in value) {
+    return Object.fromEntries(
+      Object.entries(value.mapValue.fields ?? {}).map(([key, item]) => [
+        key,
+        decodeValue(item),
+      ]),
+    );
+  }
+  return null;
+}
+
+function decodeDocument(document: FirestoreDocument) {
+  const id = document.name.split("/").pop() ?? "";
+  const fields = Object.fromEntries(
+    Object.entries(document.fields ?? {}).map(([key, value]) => [
+      key,
+      decodeValue(value),
+    ]),
+  );
+  return { id, ...fields };
+}
+
+export async function verifyFirebaseAuthorization(authorization: string | null) {
+  if (!authorization?.startsWith("Bearer ")) {
+    throw new Error("Missing Firebase access token");
+  }
+  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  if (!apiKey || apiKey.includes("REPLACE_WITH")) {
+    throw new Error("NEXT_PUBLIC_FIREBASE_API_KEY is not configured");
+  }
+  const idToken = authorization.replace(/^Bearer\s+/i, "");
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    },
+  );
+  const payload = await response.json() as {
+    users?: Array<{ localId?: string; email?: string }>;
+  };
+  const user = payload.users?.[0];
+  if (!response.ok || !user?.localId) {
+    throw new Error("Invalid Firebase access token");
+  }
+  return { id: user.localId, email: user.email };
+}
+
+export async function getStoryOrderDocument(bookId: string) {
   const response = await fetch(documentUrl(bookId), {
     headers: { Authorization: `Bearer ${await accessToken()}` },
   });
-  if (response.status === 404) return false;
+  if (response.status === 404) return null;
   if (!response.ok) {
     throw new Error(`Firestore lookup failed with ${response.status}`);
   }
-  return true;
+  return decodeDocument(await response.json() as FirestoreDocument);
 }
 
-export async function updateStoryOrderProgress(
+export async function findStoryOrderByCheckoutId(checkoutId: string) {
+  const response = await fetch(`${documentsUrl()}:runQuery`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${await accessToken()}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: "story_orders" }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: "stripe_checkout_session_id" },
+            op: "EQUAL",
+            value: { stringValue: checkoutId },
+          },
+        },
+        limit: 1,
+      },
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Firestore query failed with ${response.status}`);
+  }
+  const rows = await response.json() as Array<{ document?: FirestoreDocument }>;
+  return rows[0]?.document ? decodeDocument(rows[0].document) : null;
+}
+
+export async function patchStoryOrderDocument(
   bookId: string,
-  status: string,
-  bookTitle?: string,
+  payload: Record<string, unknown>,
 ) {
-  const updateFields = ["story_status", "updated_at"];
-  if (bookTitle) updateFields.push("book_title");
-  const query = updateFields
+  const update = { ...payload, updated_at: new Date().toISOString() };
+  const query = Object.keys(update)
     .map((field) => `updateMask.fieldPaths=${encodeURIComponent(field)}`)
     .join("&");
 
@@ -107,14 +231,13 @@ export async function updateStoryOrderProgress(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      fields: {
-        story_status: { stringValue: status },
-        updated_at: { stringValue: new Date().toISOString() },
-        ...(bookTitle ? { book_title: { stringValue: bookTitle } } : {}),
-      },
+      fields: Object.fromEntries(
+        Object.entries(update).map(([key, value]) => [key, encodeValue(value)]),
+      ),
     }),
   });
   if (!response.ok) {
     throw new Error(`Firestore update failed with ${response.status}`);
   }
+  return decodeDocument(await response.json() as FirestoreDocument);
 }

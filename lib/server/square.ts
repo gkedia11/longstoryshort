@@ -73,6 +73,8 @@ export async function createSquarePaymentLink(input: {
     checkout_options: {
       redirect_url: `${input.appUrl}/payment/success?order_id=${input.orderId}`,
       ask_for_shipping_address: false,
+      enable_coupon: true,
+      merchant_support_email: site.supportEmail,
     },
     pre_populated_data: {
       buyer_email: input.customerEmail,
