@@ -54,6 +54,7 @@ type SquareDiscount = {
   name: string;
   percentage?: number;
   amountCents?: number;
+  finalCents?: number;
 };
 
 type SquareCatalogResponse = {
@@ -112,47 +113,95 @@ export function getSquareBrowserConfig() {
 }
 
 function parsePrivateCoupons(): Record<string, SquareDiscount> {
+  const coupons: Record<string, SquareDiscount> = {};
   const raw = process.env.SQUARE_COUPONS_JSON;
-  if (!raw) return {};
 
-  try {
-    const parsed = JSON.parse(raw) as Record<
-      string,
-      number | { percentage?: number; amount_cents?: number; name?: string }
-    >;
-    const coupons: Record<string, SquareDiscount> = {};
+  if (raw) {
+    try {
+      let parsed: unknown = JSON.parse(raw);
+      if (typeof parsed === "string") parsed = JSON.parse(parsed);
+      const configured = parsed as Record<
+        string,
+        number | {
+          percentage?: number;
+          amount_cents?: number;
+          final_cents?: number;
+          name?: string;
+        }
+      >;
 
-    for (const [rawCode, value] of Object.entries(parsed)) {
-      const code = rawCode.trim().toUpperCase();
-      if (!code) continue;
-      if (typeof value === "number") {
+      for (const [rawCode, value] of Object.entries(configured)) {
+        const code = rawCode.trim().toUpperCase();
+        if (!code) continue;
+        if (typeof value === "number") {
+          coupons[code] = {
+            code,
+            name: code,
+            percentage: Math.max(0, Math.min(100, value)),
+          };
+          continue;
+        }
+
+        const percentage = typeof value.percentage === "number"
+          ? Math.max(0, Math.min(100, value.percentage))
+          : undefined;
+        const amountCents = typeof value.amount_cents === "number"
+          ? Math.max(0, Math.round(value.amount_cents))
+          : undefined;
+        const finalCents = typeof value.final_cents === "number"
+          ? Math.max(0, Math.min(site.priceCents, Math.round(value.final_cents)))
+          : undefined;
+        if (
+          percentage === undefined &&
+          amountCents === undefined &&
+          finalCents === undefined
+        ) continue;
         coupons[code] = {
           code,
-          name: code,
-          percentage: Math.max(0, Math.min(100, value)),
+          name: value.name?.trim() || code,
+          percentage,
+          amountCents,
+          finalCents,
         };
-        continue;
       }
-
-      const percentage = typeof value.percentage === "number"
-        ? Math.max(0, Math.min(100, value.percentage))
-        : undefined;
-      const amountCents = typeof value.amount_cents === "number"
-        ? Math.max(0, Math.round(value.amount_cents))
-        : undefined;
-      if (percentage === undefined && amountCents === undefined) continue;
-      coupons[code] = {
-        code,
-        name: value.name?.trim() || code,
-        percentage,
-        amountCents,
-      };
+    } catch {
+      console.error("Ignoring invalid SQUARE_COUPONS_JSON");
     }
-
-    return coupons;
-  } catch {
-    throw new Error("SQUARE_COUPONS_JSON is not valid JSON");
   }
+
+  const zoroPercentage = Number(process.env.SQUARE_COUPON_ZORO_PERCENTAGE);
+  if (Number.isFinite(zoroPercentage)) {
+    coupons.ZORO = {
+      code: "ZORO",
+      name: "ZORO",
+      percentage: Math.max(0, Math.min(100, zoroPercentage)),
+    };
+  }
+
+  const onehitFinalCents = Number(process.env.SQUARE_COUPON_ONEHIT_FINAL_CENTS);
+  if (Number.isFinite(onehitFinalCents)) {
+    coupons.ONEHIT = {
+      code: "ONEHIT",
+      name: "ONEHIT",
+      finalCents: Math.max(
+        0,
+        Math.min(site.priceCents, Math.round(onehitFinalCents)),
+      ),
+    };
+  }
+
+  return coupons;
+}
+
+function getCouponDiscountCents(coupon: SquareDiscount | null) {
+  if (!coupon) return 0;
+  if (coupon.percentage !== undefined) {
+    return Math.round(site.priceCents * (coupon.percentage / 100));
+  }
+  if (coupon.finalCents !== undefined) {
+    return Math.max(0, site.priceCents - coupon.finalCents);
+  }
+  return Math.min(site.priceCents, coupon.amountCents ?? 0);
 }
 
 async function findCatalogDiscount(code: string): Promise<SquareDiscount | null> {
@@ -212,9 +261,7 @@ export async function quoteSquarePayment(couponCode?: string) {
     throw new Error("That discount code is not valid.");
   }
 
-  const discountCents = coupon?.percentage !== undefined
-    ? Math.round(site.priceCents * (coupon.percentage / 100))
-    : Math.min(site.priceCents, coupon?.amountCents ?? 0);
+  const discountCents = getCouponDiscountCents(coupon);
 
   return {
     subtotalCents: site.priceCents,
@@ -243,7 +290,7 @@ export async function createSquareOrder(input: {
           ? { percentage: String(coupon.percentage) }
           : {
               amount_money: {
-                amount: Math.min(site.priceCents, coupon.amountCents ?? 0),
+                amount: getCouponDiscountCents(coupon),
                 currency: site.currency.toUpperCase(),
               },
             }),
