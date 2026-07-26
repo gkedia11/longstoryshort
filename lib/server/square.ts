@@ -165,7 +165,7 @@ function parsePrivateCoupons(): Record<string, SquareDiscount> {
         };
       }
     } catch {
-      console.error("Ignoring invalid SQUARE_COUPONS_JSON");
+      console.warn("Ignoring invalid optional SQUARE_COUPONS_JSON");
     }
   }
 
