@@ -57,11 +57,29 @@ export function DashboardClient() {
         .map((item) => item.data() as StoryOrder)
         .sort((a, b) => b.created_at.localeCompare(a.created_at));
       setOrders(data);
-      setMessage(
-        data.length
-          ? "Your latest novel manuscript orders are below."
-          : "No novel manuscript orders yet.",
+      const requestedCheckoutId = new URLSearchParams(window.location.search).get("checkout");
+      const requestedOrder = data.find((order) =>
+        order.id === requestedCheckoutId &&
+        order.story_status === "pending_payment" &&
+        order.stripe_payment_status !== "paid"
       );
+      if (requestedOrder) {
+        setCheckoutOrderId(requestedOrder.id);
+        setMessage("Enter your payment details below. You will stay on this page.");
+        window.history.replaceState(null, "", "/dashboard");
+        window.requestAnimationFrame(() => {
+          document.getElementById(`checkout-${requestedOrder.id}`)?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        });
+      } else {
+        setMessage(
+          data.length
+            ? "Your latest novel manuscript orders are below."
+            : "No novel manuscript orders yet.",
+        );
+      }
     } catch {
       setMessage("We could not refresh your novel manuscript orders.");
     } finally {
@@ -151,7 +169,7 @@ export function DashboardClient() {
                         </td>
                       </tr>
                       {checkoutOpen ? (
-                        <tr>
+                        <tr id={`checkout-${order.id}`}>
                           <td colSpan={6} className="bg-[#f7faf7] px-5 py-5">
                             <SquareCardPayment
                               orderId={order.id}
