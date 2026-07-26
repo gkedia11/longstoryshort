@@ -1,26 +1,39 @@
 import { site } from "@/lib/site";
 import { getStoryOrder, updateStoryOrder } from "@/lib/server/firebase";
 
-export async function sendStoryOrderToN8n(orderId: string, paymentId: string) {
-  const order = await getStoryOrder(orderId);
-  if (!order) {
-    throw new Error("Order not found for n8n delivery");
-  }
+type PaymentDetails = {
+  amountCents?: number;
+  receiptUrl?: string;
+  squareOrderId?: string;
+};
 
-  if (order.story_status === "sent_to_n8n") {
+export async function sendStoryOrderToN8n(
+  orderId: string,
+  paymentId: string,
+  paymentDetails: PaymentDetails = {},
+) {
+  const order = await getStoryOrder(orderId);
+  if (!order) throw new Error("Order not found for n8n delivery");
+
+  const priorResponse = order.n8n_response as { ok?: boolean } | null;
+  if (order.story_status === "sent_to_n8n" || priorResponse?.ok) {
     return { duplicate: true };
   }
 
+  const paidAmount = paymentDetails.amountCents ?? site.priceCents;
   const payload = {
+    event_type: "payment_completed",
     order_id: order.id,
     book_id: order.id,
+    square_order_id: paymentDetails.squareOrderId ?? order.stripe_checkout_session_id,
     square_payment_id: paymentId,
+    square_receipt_url: paymentDetails.receiptUrl ?? order.square_receipt_url ?? null,
     user_id: order.user_id,
     name: order.name,
     email: order.email,
     genre: order.genre,
     summary: order.summary,
-    paid_amount: site.priceCents,
+    paid_amount: paidAmount,
     currency: site.currency,
     brand: site.name,
   };
@@ -34,7 +47,7 @@ export async function sendStoryOrderToN8n(orderId: string, paymentId: string) {
   const responseBody = await response.text();
 
   await updateStoryOrder(order.id, {
-    story_status: response.ok ? "sent_to_n8n" : "failed",
+    story_status: "submitted",
     n8n_response: {
       ok: response.ok,
       status: response.status,
