@@ -29,9 +29,13 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   icons: {
-    icon: "/brand-icon-512.png",
-    shortcut: "/brand-icon-512.png",
-    apple: "/brand-icon-512.png",
+    icon: {
+      url: "/favicon-logo.png",
+      type: "image/png",
+      sizes: "393x393",
+    },
+    shortcut: "/favicon-logo.png",
+    apple: "/favicon-logo.png",
   },
   manifest: "/manifest.webmanifest",
   verification: {
