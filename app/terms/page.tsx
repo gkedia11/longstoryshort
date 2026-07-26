@@ -5,14 +5,14 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description:
-    "Review the Longstory Short Story terms for novel manuscript orders, payment, delivery, permitted use, and support.",
+    "Review the Long Story Short terms for novel manuscript orders, payment, delivery, permitted use, and support.",
   alternates: { canonical: "/terms" },
 };
 
 const sections = [
   {
     title: "Service",
-    body: `Longstory Short Story is a service of ${site.legalName}. We create a complete novel manuscript from the genre, premise, story summary, and creative preferences a customer submits. Our structured process may use technology-assisted writing and editorial tools, followed by preparation and proofreading for delivery.`,
+    body: `Long Story Short is a service of ${site.legalName}. We create a complete novel manuscript from the genre, premise, story summary, and creative preferences a customer submits. Our structured process may use technology-assisted writing and editorial tools, followed by preparation and proofreading for delivery.`,
   },
   {
     title: "Customer submissions",
@@ -56,7 +56,7 @@ export default function TermsPage() {
           <div className="mx-auto max-w-4xl">
             <h1 className="text-4xl font-semibold sm:text-6xl">Terms of Service</h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-white/72">
-              The terms that apply when you order a novel manuscript from Longstory Short Story.
+              The terms that apply when you order a novel manuscript from Long Story Short.
             </p>
             <p className="mt-4 text-sm text-white/55">Effective July 10, 2026</p>
           </div>

@@ -10,7 +10,7 @@ export function Logo({ compact = false }: LogoProps) {
     <Link
       href="/"
       className="logo-link flex items-center gap-2.5 rounded-md bg-[#07110d]/38 px-1.5 py-1 backdrop-blur-[2px] transition duration-200 hover:-translate-y-0.5 hover:scale-[1.025] sm:gap-3 sm:px-2"
-      aria-label="Longstory Short Story home"
+      aria-label="Long Story Short home"
     >
       <span
         className={[
@@ -20,7 +20,7 @@ export function Logo({ compact = false }: LogoProps) {
       >
         <Image
           src="/brand-logo-circular.png"
-          alt="Longstory Short Story"
+          alt="Long Story Short"
           fill
           unoptimized
           sizes={compact ? "36px" : "(min-width: 640px) 48px, 36px"}
@@ -33,8 +33,8 @@ export function Logo({ compact = false }: LogoProps) {
           compact ? "text-sm font-semibold" : "text-sm font-bold sm:text-lg",
         ].join(" ")}
       >
-        Longstory
-        <span className="block text-[#d9b56c]">Short Story</span>
+        Long Story
+        <span className="block text-[#d9b56c]">Short</span>
       </span>
     </Link>
   );

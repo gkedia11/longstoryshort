@@ -19,8 +19,8 @@ export const metadata: Metadata = {
   publisher: site.legalName,
   category: "books and literature",
   title: {
-    default: "Complete Novel Manuscripts | Longstory Short Story",
-    template: "%s | Longstory Short Story",
+    default: "Complete Novel Manuscripts | Long Story Short",
+    template: "%s | Long Story Short",
   },
   description:
     "Turn your story idea into a complete novel manuscript with plot development, outlining, writing, and proofreading included.",
@@ -57,11 +57,11 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    title: "Complete Novel Manuscripts | Longstory Short Story",
+    title: "Complete Novel Manuscripts | Long Story Short",
     description:
       "Turn your story idea into a complete novel manuscript with one simple price.",
     url: site.url,
-    siteName: "Longstory Short Story",
+    siteName: "Long Story Short",
     images: [
       {
         url: "/social-share.jpg",
@@ -73,7 +73,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Complete Novel Manuscripts | Longstory Short Story",
+    title: "Complete Novel Manuscripts | Long Story Short",
     description:
       "Turn your story idea into a complete novel manuscript with one simple price.",
     images: ["/social-share.jpg"],

@@ -76,7 +76,7 @@ const faqs = [
   {
     question: "Is this a subscription?",
     answer:
-      "No. Longstory Short Story uses a single $29.99 checkout for each novel manuscript order.",
+      "No. Long Story Short uses a single $29.99 checkout for each novel manuscript order.",
   },
 ];
 

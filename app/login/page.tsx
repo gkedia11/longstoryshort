@@ -6,7 +6,7 @@ import { Logo } from "@/components/Logo";
 export const metadata: Metadata = {
   title: "Log In or Create Account",
   description:
-    "Sign in to manage your Longstory Short Story novel manuscript orders.",
+    "Sign in to manage your Long Story Short novel manuscript orders.",
   robots: {
     index: false,
     follow: false,

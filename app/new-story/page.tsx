@@ -5,7 +5,7 @@ import { NewStoryForm } from "@/components/NewStoryForm";
 export const metadata: Metadata = {
   title: "Start a Novel Manuscript Order",
   description:
-    "Start a Longstory Short Story order for a complete novel manuscript.",
+    "Start a Long Story Short order for a complete novel manuscript.",
   robots: {
     index: false,
     follow: false,

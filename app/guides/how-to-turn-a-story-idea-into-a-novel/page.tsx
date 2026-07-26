@@ -58,7 +58,7 @@ export default function StoryIdeaGuidePage() {
               </div>
               <div className="mt-10 border-t border-[#dbe5df] pt-8">
                 <h2 className="text-2xl font-semibold text-[#101513]">Ready to move from premise to manuscript?</h2>
-                <p className="mt-3 leading-7 text-[#52615a]">Share your genre, story idea, characters, tone, and ending preferences. Longstory Short Story develops the plot, outline, complete novel manuscript, and proofreading for one simple price.</p>
+                <p className="mt-3 leading-7 text-[#52615a]">Share your genre, story idea, characters, tone, and ending preferences. Long Story Short develops the plot, outline, complete novel manuscript, and proofreading for one simple price.</p>
                 <Link href="/new-story" className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-[#007a4d] px-6 py-3 font-semibold text-white hover:bg-[#004d33]">Start your novel manuscript <ArrowRight aria-hidden="true" size={18} /></Link>
               </div>
             </div>

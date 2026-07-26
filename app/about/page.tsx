@@ -22,7 +22,7 @@ export default function AboutPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "AboutPage",
-    name: "About Longstory Short Story",
+    name: "About Long Story Short",
     url: `${site.url}/about`,
     about: { "@type": "Organization", name: site.legalName, alternateName: site.name },
   };
@@ -38,7 +38,7 @@ export default function AboutPage() {
               Helping good story ideas become complete novels.
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-              Longstory Short Story is operated by {site.legalName}. We built the service for people who have a premise worth pursuing but need a structured path to a finished novel manuscript.
+              Long Story Short is operated by {site.legalName}. We built the service for people who have a premise worth pursuing but need a structured path to a finished novel manuscript.
             </p>
           </div>
         </section>

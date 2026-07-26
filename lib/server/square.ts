@@ -400,7 +400,7 @@ export async function createSquarePaymentLink(input: {
       merchant_support_email: site.supportEmail,
     },
     pre_populated_data: { buyer_email: input.customerEmail },
-    description: `Longstory Short Story novel manuscript order ${input.orderId}`,
+    description: `Long Story Short novel manuscript order ${input.orderId}`,
     payment_note: `story_order_id=${input.orderId}; application_id=${applicationId}`,
   };
 

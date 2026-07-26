@@ -1,7 +1,7 @@
 const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
 
 export const site = {
-  name: "Longstory Short Story",
+  name: "Long Story Short",
   legalName: "Long Story Short LLC",
   domain: "longstoryshortllc.com",
   finalUrl: "https://longstoryshortllc.com",

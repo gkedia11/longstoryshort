@@ -5,14 +5,14 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "Learn how Long Story Short LLC collects, uses, protects, and shares information for Longstory Short Story orders.",
+    "Learn how Long Story Short LLC collects, uses, protects, and shares information for Long Story Short orders.",
   alternates: { canonical: "/privacy" },
 };
 
 const sections = [
   {
     title: "Who we are",
-    body: `Longstory Short Story is operated by ${site.legalName}. This policy explains how we handle personal information when you visit the website, create an account, place an order, or contact support.`,
+    body: `Long Story Short is operated by ${site.legalName}. This policy explains how we handle personal information when you visit the website, create an account, place an order, or contact support.`,
   },
   {
     title: "Information we collect",

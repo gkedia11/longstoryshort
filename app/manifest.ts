@@ -4,7 +4,7 @@ import { site } from "@/lib/site";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: site.name,
-    short_name: "Longstory Short",
+    short_name: "Long Story Short",
     description:
       "Turn a story idea into a complete novel manuscript with one simple price.",
     start_url: "/",

@@ -6,7 +6,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Contact Longstory Short Story for novel manuscript order help, account questions, and delivery support.",
+    "Contact Long Story Short for novel manuscript order help, account questions, and delivery support.",
   alternates: {
     canonical: "/contact",
   },
