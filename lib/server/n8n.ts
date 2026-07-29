@@ -4,7 +4,7 @@ import { getStoryOrder, updateStoryOrder } from "@/lib/server/firebase";
 type PaymentDetails = {
   amountCents?: number;
   receiptUrl?: string;
-  squareOrderId?: string;
+  stripePaymentIntentId?: string;
 };
 
 export async function sendStoryOrderToN8n(
@@ -25,9 +25,14 @@ export async function sendStoryOrderToN8n(
     event_type: "payment_completed",
     order_id: order.id,
     book_id: order.id,
-    square_order_id: paymentDetails.squareOrderId ?? order.stripe_checkout_session_id,
-    square_payment_id: paymentId,
-    square_receipt_url: paymentDetails.receiptUrl ?? order.square_receipt_url ?? null,
+    payment_provider: "stripe",
+    payment_id: paymentId,
+    payment_receipt_url:
+      paymentDetails.receiptUrl ?? order.payment_receipt_url ?? null,
+    stripe_payment_intent_id:
+      paymentDetails.stripePaymentIntentId ??
+      order.stripe_payment_intent_id ??
+      paymentId,
     user_id: order.user_id,
     name: order.name,
     email: order.email,

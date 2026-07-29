@@ -13,6 +13,7 @@
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^9.12.1",
     "drizzle-orm": "0.45.2",
     "firebase": "^12.16.0",
     "firebase-admin": "^14.2.0",

@@ -15,8 +15,8 @@ export type StoryOrder = {
   stripe_checkout_session_id: string | null;
   stripe_payment_status: string | null;
   story_status: "draft" | "pending_payment" | "paid" | "submitted" | "sent_to_n8n" | "failed";
-  square_receipt_url?: string | null;
-  square_payment_id?: string | null;
+  payment_receipt_url?: string | null;
+  stripe_payment_intent_id?: string | null;
   n8n_response: unknown | null;
   created_at: string;
   updated_at: string;

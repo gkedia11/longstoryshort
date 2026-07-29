@@ -6,7 +6,7 @@ Long Story Short LLC helps customers order a complete novel manuscript from a st
 
 - Firebase Authentication for email/password, password reset, and Google sign-in.
 - Cloud Firestore for customer profiles and novel manuscript orders.
-- Square for secure payment links and payment notifications.
+- Stripe Payment Element for embedded checkout, promotion codes, receipts, and payment notifications.
 - n8n for post-payment manuscript workflow delivery.
 
 ## Firebase Setup

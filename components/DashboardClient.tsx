@@ -6,7 +6,7 @@ import { ArrowRight, CreditCard, RefreshCw } from "lucide-react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFirebaseAuth, getFirebaseDb } from "@/lib/firebase/client";
-import { SquareCardPayment } from "@/components/SquareCardPayment";
+import { StripePaymentElement } from "@/components/StripePaymentElement";
 
 type StoryOrder = {
   id: string;
@@ -171,7 +171,7 @@ export function DashboardClient() {
                       {checkoutOpen ? (
                         <tr id={`checkout-${order.id}`}>
                           <td colSpan={6} className="bg-[#f7faf7] px-5 py-5">
-                            <SquareCardPayment
+                            <StripePaymentElement
                               orderId={order.id}
                               customerName={order.name}
                               customerEmail={order.email}

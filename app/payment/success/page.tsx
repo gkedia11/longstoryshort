@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, LayoutDashboard } from "lucide-react";
 import { AppNav } from "@/components/AppNav";
-import { PaymentSuccessStatus } from "@/components/PaymentSuccessStatus";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -48,7 +47,9 @@ export default async function PaymentSuccessPage({
             Book ID {params.order_id}
           </p>
         ) : null}
-        <PaymentSuccessStatus orderId={params.order_id} />
+        <p className="mt-5 text-[#52615a]">
+          Open your dashboard to review the current status of your novel manuscript order.
+        </p>
         <Link
           href="/dashboard"
           className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#007a4d] px-6 py-3.5 font-semibold text-white transition hover:bg-[#004d33]"
