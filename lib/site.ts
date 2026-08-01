@@ -6,7 +6,7 @@ export const site = {
   domain: "longstoryshortllc.com",
   finalUrl: "https://longstoryshortllc.com",
   url: configuredUrl || "https://longstoryshort.giltunnel.org",
-  supportEmail: "team@longstoryshort.com",
+  supportEmail: "team@longstoryshortllc.com",
   price: "$29.99",
   priceCents: 2999,
   currency: "usd",
