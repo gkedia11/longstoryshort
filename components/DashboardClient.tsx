@@ -14,10 +14,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import { getFirebaseAuth, getFirebaseDb } from "@/lib/firebase/client";
 import { StripePaymentElement } from "@/components/StripePaymentElement";
 import {
-  customerStoryStatusLabel,
   customerStoryStatusMessage,
   isManuscriptReady,
-  type StoryStatusHistoryEntry,
 } from "@/lib/story-progress";
 
 type StoryOrder = {
@@ -29,7 +27,6 @@ type StoryOrder = {
   stripe_payment_status: string | null;
   story_status: string;
   customer_status_message?: string | null;
-  status_history?: StoryStatusHistoryEntry[];
   delivery?: {
     provider: "google_drive";
     file_id: string;
@@ -38,20 +35,6 @@ type StoryOrder = {
     ready_at: string;
   } | null;
   created_at: string;
-};
-
-const badge: Record<string, string> = {
-  draft: "bg-slate-100 text-slate-700",
-  pending_payment: "bg-amber-100 text-amber-800",
-  paid: "bg-emerald-100 text-emerald-800",
-  submitted: "bg-green-100 text-green-800",
-  sent_to_n8n: "bg-green-100 text-green-800",
-  story_submitted: "bg-green-100 text-green-800",
-  plan_ready: "bg-sky-100 text-sky-800",
-  writing_proofreading_complete: "bg-violet-100 text-violet-800",
-  ready: "bg-emerald-100 text-emerald-800",
-  delivered: "bg-emerald-100 text-emerald-800",
-  failed: "bg-rose-100 text-rose-800",
 };
 
 function sortedOrders(snapshot: Awaited<ReturnType<typeof getDocs>>) {
@@ -267,9 +250,9 @@ export function DashboardClient() {
                   <th className="px-5 py-4">Story</th>
                   <th className="px-5 py-4">Genre</th>
                   <th className="px-5 py-4">Payment</th>
-                  <th className="min-w-72 px-5 py-4">Story status</th>
+                  <th className="min-w-72 px-5 py-4">Progress</th>
                   <th className="px-5 py-4">Created</th>
-                  <th className="px-5 py-4">Action</th>
+                  <th className="px-5 py-4">Next step</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#dbe5df]">
@@ -280,9 +263,6 @@ export function DashboardClient() {
                   const checkoutOpen = checkoutOrderId === order.id;
                   const ready =
                     isManuscriptReady(order.story_status) && !!order.delivery;
-                  const progressHistory = (order.status_history ?? []).filter(
-                    (entry) => entry.status !== "pending_payment",
-                  );
                   return (
                     <Fragment key={order.id}>
                       <tr>
@@ -301,33 +281,13 @@ export function DashboardClient() {
                             ? "Paid"
                             : "Payment needed"}
                         </td>
-                        <td className="px-5 py-4 align-top">
-                          <span
-                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${badge[order.story_status] ?? badge.draft}`}
-                          >
-                            {customerStoryStatusLabel(order.story_status)}
-                          </span>
-                          <p className="mt-3 max-w-sm leading-6 text-[#52615a]">
+                        <td className="min-w-72 px-5 py-4 align-top">
+                          <p className="max-w-sm leading-6 text-[#52615a]">
                             {customerStoryStatusMessage(
                               order.story_status,
                               order.customer_status_message,
                             )}
                           </p>
-                          {progressHistory.length > 1 ? (
-                            <ol
-                              aria-label="Order progress history"
-                              className="mt-3 space-y-2 border-l border-[#b8c8bf] pl-3 text-xs leading-5 text-[#6f7d76]"
-                            >
-                              {progressHistory.slice(-4).map((entry) => (
-                                <li key={`${entry.status}-${entry.at}`}>
-                                  <span className="font-semibold text-[#34423c]">
-                                    {customerStoryStatusLabel(entry.status)}
-                                  </span>{" "}
-                                  · {new Date(entry.at).toLocaleString()}
-                                </li>
-                              ))}
-                            </ol>
-                          ) : null}
                         </td>
                         <td className="px-5 py-4 align-top">
                           {new Date(order.created_at).toLocaleDateString()}
@@ -360,9 +320,7 @@ export function DashboardClient() {
                             </button>
                           ) : (
                             <span className="text-sm text-[#6f7d76]">
-                              {order.stripe_payment_status === "paid"
-                                ? "Updates appear automatically"
-                                : "No action needed"}
+                              No action needed
                             </span>
                           )}
                         </td>
